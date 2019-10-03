@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "allowJs": true,
+        "moduleResolution": "node",
+        "target": "es2015"
+    },
+    "include": [
+        "src/**/*.ts"
+    ]
+}

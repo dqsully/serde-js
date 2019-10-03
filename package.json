@@ -1,0 +1,35 @@
+{
+    "name": "ijson",
+    "description": "Super-customizable json parser",
+    "main": "./lib/index.js",
+    "version": "4.0.0",
+    "keywords": [
+        "json",
+        "json5",
+        "hjson",
+        "comments",
+        "config",
+        "parser",
+        "serializer",
+        "human"
+    ],
+    "bin": {
+        "hjson": "./lib/bin/hjson"
+    },
+    "scripts": {
+        "build": "tsc"
+    },
+    "homepage": "http://hjson.org",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/hjson/hjson-js.git"
+    },
+    "bugs": {
+        "url": "https://github.com/hjson/hjson-js/issues"
+    },
+    "license": "MIT",
+    "devDependencies": {
+        "typescript": "^3.6.3"
+    },
+    "dependencies": {}
+}
