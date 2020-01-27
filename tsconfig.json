@@ -1,11 +1,23 @@
 {
     "compilerOptions": {
-        "strict": true,
-        "allowJs": true,
+        "module": "commonjs",
+        "target": "es2016",
+        "noImplicitAny": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
         "moduleResolution": "node",
-        "target": "es2015"
+        "sourceMap": true,
+        "strict": true,
+        "esModuleInterop": true,
+        "declaration": true,
+        "outDir": "dist"
     },
     "include": [
-        "src/**/*.ts"
+        "**/*.ts"
+    ],
+    "exclude": [
+        "**/*.test.ts",
+        "**/*.d.ts",
+        "dist"
     ]
 }

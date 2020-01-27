@@ -1,19 +1,26 @@
-import { AbstractSource, SourceConsumer } from "./abstract";
+import { Stringifiable } from '../../types/stringifiable';
+import parseStrings from './common';
+import { Visitor, Visitors, AbstractValueVisitor } from '../visitor/abstract';
+import { AbstractFeature } from '../features/abstract';
 
-function* iterateString(string: string) {
-    let char;
+export default function parseString(
+    data: Stringifiable,
+    rootVisitor: Visitor<AbstractValueVisitor<any>>,
+    rootFeatures: AbstractFeature[],
+    visitors: Visitors,
+) {
+    const parser = parseStrings(
+        data.toString()[Symbol.iterator](),
+        rootVisitor,
+        rootFeatures,
+        visitors,
+    );
 
-    for (char of string) {
-        yield char;
-    }
-}
+    let result;
 
-export class StringSource extends AbstractSource {
-    private iterator: Generator<string, void>;
+    do {
+        result = parser.next();
+    } while (!result.done);
 
-    constructor(parser: SourceConsumer, input: string) {
-        super(parser);
-
-        this.iterator = iterateString(input);
-    }
+    return result.value;
 }

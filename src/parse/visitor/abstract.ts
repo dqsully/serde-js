@@ -1,61 +1,46 @@
-export interface Visitor<V extends AbstractVisitor<any>> {
+import { VisitorContext } from './context';
+
+type MetadataValueAtom = boolean | number | string;
+export type MetadataValue = MetadataValueAtom | MetadataValueAtom[];
+
+export interface AbstractVisitor<C extends VisitorContext> {
+    _C: C;
+
+    addMetadata(context: C, kind: string, value: MetadataValue): void;
+    getMetadata(context: C, kind: string): MetadataValue | undefined;
+
+    visitValue(context: C, value: any): void;
+}
+
+export interface AbstractValueVisitor<C extends VisitorContext> extends AbstractVisitor<C> {
+    initialize(): C;
+    finalize(context: C): any;
+}
+
+export interface AbstractObjectVisitor<C extends VisitorContext> extends AbstractVisitor<C> {
+    initialize(): C;
+    finalize(context: C): object;
+
+    seedKey(context: C): Visitor<AbstractObjectKeyVisitor<any>>;
+}
+
+export interface AbstractObjectKeyVisitor<C extends VisitorContext> extends AbstractVisitor<C> {
+    finalize(context: C): void;
+}
+
+export interface AbstractArrayVisitor<C extends VisitorContext> extends AbstractVisitor<C> {
+    initialize(): C;
+    finalize(context: C): any[];
+}
+
+export interface Visitor<V extends AbstractVisitor<any> = AbstractVisitor<any>> {
     impl: V;
-    context: V['_C'];
+    context: ReturnType<V['_C']>;
 }
 
-export interface VisitorContext {
-    state: number;
-}
-
-export interface ChildVisitorContext<
-    P = AbstractVisitor<any>
-> extends VisitorContext {
-    parent: P;
-}
-
-export const INITIAL_STATE = 0;
-export const FINALIZED_FLAG    = 0b0000_0001;
-
-export abstract class AbstractVisitor<C extends VisitorContext> {
-    public _C!: C;
-
-    public isFinalized(context: C): boolean {
-        return (context.state & FINALIZED_FLAG) > 0;
-    }
-    public setFinalized(context: C) {
-        context.state = context.state | FINALIZED_FLAG;
-    }
-
-    public abstract initialize(): C;
-
-    public abstract addMetadata(context: C, kind: string): void;
-    public abstract getMetadata(context: C, kind: string): void;
-
-    public abstract finalize(context: C): any;
-}
-
-export abstract class AbstractValueVisitor<
-    C extends VisitorContext,
-> extends AbstractVisitor<C> {
-    public abstract visitValue(context: C, value: any): void;
-    public abstract visitObject(context: C): AbstractObjectVisitor<any>;
-    public abstract visitArray(context: C): AbstractArrayVisitor<any>;
-}
-
-export abstract class AbstractObjectVisitor<
-    C extends ChildVisitorContext,
-> extends AbstractVisitor<C> {
-    public abstract visitProperty(context: C): AbstractObjectKeyVisitor<any>;
-}
-
-export abstract class AbstractObjectKeyVisitor<
-    C extends ChildVisitorContext<AbstractObjectVisitor<any>>
-> extends AbstractVisitor<C> {
-    public abstract visitKey(context: C, key: any): AbstractValueVisitor<any>;
-}
-
-export abstract class AbstractArrayVisitor<
-    C extends ChildVisitorContext,
-> extends AbstractVisitor<C> {
-    public abstract visitItem(context: C): AbstractValueVisitor<any>;
+export interface Visitors {
+    value: AbstractValueVisitor<VisitorContext>,
+    object: AbstractObjectVisitor<VisitorContext>,
+    objectKey: AbstractObjectKeyVisitor<VisitorContext>,
+    array: AbstractArrayVisitor<VisitorContext>,
 }

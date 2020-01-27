@@ -1,4 +1,4 @@
-import { Stringifiable } from "./stringifiable";
+import { Stringifiable } from './stringifiable';
 
 export interface Readable {
     on(event: 'error', callback: (error: any) => void): void;
