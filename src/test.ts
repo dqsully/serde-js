@@ -24,7 +24,7 @@ const whitespace: AbstractFeature[] = [
 const valueFeatures: AbstractFeature[] = [
     new BooleanFeature(),
     new DoubleQuotedStringFeature(),
-    // new StrictCommaObjectFeature()
+    // StrictCommaObjectFeature
 ];
 const keyFeatures: AbstractFeature[] = [
     new DoubleQuotedStringFeature(),
@@ -44,7 +44,9 @@ const data = `
     "foo" /* in the weird places */ : "bar" /* yup weird */,
     "foo2": "bar2",
     "object": {
-        "lol": "it works!!!"
+        "lol": "it works!!!",
+        "bool too": true,
+        "and false": false
     }
 }
 `;
