@@ -12,6 +12,7 @@ import AnyWhitespaceFeature from './parse/features/whitespace/any';
 import DoubleQuotedStringFeature from './parse/features/string/double-quoted';
 import StrictCommaObjectFeature from './parse/features/object/strict-comma';
 import { AbstractFeature } from './parse/features/abstract';
+import NullFeature from './parse/features/other/null';
 
 const whitespace: AbstractFeature[] = [
     new AnyWhitespaceFeature(),
@@ -22,6 +23,7 @@ const whitespace: AbstractFeature[] = [
 ];
 
 const valueFeatures: AbstractFeature[] = [
+    new NullFeature(),
     new BooleanFeature(),
     new DoubleQuotedStringFeature(),
     // StrictCommaObjectFeature
@@ -46,7 +48,8 @@ const data = `
     "object": {
         "lol": "it works!!!",
         "bool too": true,
-        "and false": false
+        "and false": false,
+        "null": null
     }
 }
 `;
