@@ -10,9 +10,11 @@ import SlashStarCommentFeature from './parse/features/comment/slash-star';
 import RootFeature from './parse/features/other/root';
 import AnyWhitespaceFeature from './parse/features/whitespace/any';
 import DoubleQuotedStringFeature from './parse/features/string/double-quoted';
+import SingleQuotedStringFeature from './parse/features/string/single-quoted';
 import StrictCommaObjectFeature from './parse/features/object/strict-comma';
 import { AbstractFeature } from './parse/features/abstract';
 import NullFeature from './parse/features/other/null';
+import StrictCommaArrayFeature from './parse/features/array/strict-comma';
 
 const whitespace: AbstractFeature[] = [
     new AnyWhitespaceFeature(),
@@ -26,7 +28,9 @@ const valueFeatures: AbstractFeature[] = [
     new NullFeature(),
     new BooleanFeature(),
     new DoubleQuotedStringFeature(),
-    // StrictCommaObjectFeature
+    new SingleQuotedStringFeature(),
+    // StrictCommaObjectFeature (placeholder)
+    // StrictCommaArrayFeature (placeholder)
 ];
 const keyFeatures: AbstractFeature[] = [
     new DoubleQuotedStringFeature(),
@@ -34,6 +38,13 @@ const keyFeatures: AbstractFeature[] = [
 
 valueFeatures.push(
     new StrictCommaObjectFeature({
+        keyFeatures,
+        valueFeatures,
+        whitespace,
+    }),
+);
+valueFeatures.push(
+    new StrictCommaArrayFeature({
         keyFeatures,
         valueFeatures,
         whitespace,
@@ -47,9 +58,19 @@ const data = `
     "foo2": "bar2",
     "object": {
         "lol": "it works!!!",
+
         "bool too": true,
         "and false": false,
-        "null": null
+
+        "null": null,
+
+        "array test": [
+            // comment here
+            'string',
+            # comment there
+            true
+            -- comment everywhere!!!
+        ]
     }
 }
 `;

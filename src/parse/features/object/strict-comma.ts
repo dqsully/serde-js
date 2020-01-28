@@ -19,7 +19,6 @@ export default class StrictCommaObjectFeature extends AbstractFeature<Settings> 
         this.settings = settings;
     }
 
-    // We don't use `this` because there are no settings for `BooleanFeature`
     public* parse(
         firstChar: string,
         visitor: Visitor,
