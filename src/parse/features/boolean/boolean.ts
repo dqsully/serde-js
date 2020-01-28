@@ -24,21 +24,18 @@ export default class BooleanFeature extends AbstractFeature<Settings> {
             return () => `expected '${firstChar}' to be 't' or 'f' for 'true' or 'false'`;
         }
 
-        let nextCharIndex = 1;
         let char: string | undefined;
 
-        while (nextCharIndex < variant.length) {
+        for (let i = 1; i < variant.length; i += 1) {
             // Read next character
             char = yield;
 
             if (char === undefined) {
                 return () => 'unexpected end of file';
             }
-            if (char !== variant[nextCharIndex]) {
-                return () => `expected '${char}' to be '${variant[nextCharIndex]}' for '${variant.join('')}'`;
+            if (char !== variant[i]) {
+                return () => `expected '${char}' to be '${variant[i]}' for '${variant.join('')}'`;
             }
-
-            nextCharIndex += 1;
         }
 
         visitor.impl.visitValue(visitor.context, variant === trueChars);
