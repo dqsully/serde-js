@@ -102,6 +102,7 @@ export default class StrictCommaObjectFeature extends AbstractFeature<Settings> 
                     return () => `expected '${char}' to be ',' or '}' for a strict-comma object`;
                 }
 
+                // Parse any whitespace
                 yield {
                     features: this.settings.whitespace,
                     visitor: objVisitor,
