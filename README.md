@@ -1,12 +1,12 @@
 # SerDe JS (unofficial title)
 This is a work-in-progress project to build a single JSON/JSON5/Hjson parser to rule them all. The core idea of this library is to be able to compose parsers out of individual language features (like `BooleanFeature`, `DoubleSlashCommentFeature`, etc.) and a "visitor" implementation that creates real data from the language feature parsers. These "visitors" will also be able to store metadata in the output, so that data can be stringified back into its (mostly) original formatting. This is the same concept as "round-trip parsing" in Hjson.
 
-My goal for this project is primarily flexibility, and not speed. This is not mean't to be the fastest parser in the world, although I try to take efficiency very seriously when it's important.
+My goal for this project is primarily flexibility, and not speed. This is not mean't to be the fastest parser in the world, although I try to take efficiency very seriously.
 
-At the moment only a handful of language features are built out, although they don't "visit" any metadata yet, and there's only one "visitor" implementation that ignores metadata altogether. Eventually I intend to build out all the features of JSON, JSON5 (or JSON6, JSOX, etc.), Hjson, and maybe even some other features like a proper `Date` type. The visitors I'd like to build include one that stores metadata like Hjson but with a symbol key instead of `__COMMENTS__`, one that stores metadata in a separate AST (kinda similar to jju), and of course one that doesn't store metadata at all.
+At the moment only a handful of language features are built out, although they don't "visit" any metadata yet. There's also only one "visitor" implementation but it doesn't store any metadata anyway. Eventually I intend to build out all the features of JSON, JSONC, JSON5 (or JSON6, JSOX, etc.), Hjson, and maybe even some other features like a proper `Date` type. The visitors I'd like to build include one that stores metadata like Hjson but with a symbol key instead of `__COMMENTS__`, one that stores metadata in a separate AST (kinda similar to jju), and of course one that doesn't store metadata at all.
 
 ## Playing around with it
-To get started with this project, make sure you have Node.js and NPM installed, then clone down this repository and install the NPM dependencies:
+To get started with this project, first make sure you have Node.js and NPM installed, and then clone down this repository and install the NPM dependencies:
 ```
 git clone https://github.com/dqsully/serde-js
 cd serde-js
