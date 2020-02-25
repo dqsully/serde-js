@@ -1,4 +1,4 @@
-import { Visitor, Visitors, AbstractValueVisitor } from '../visitor/abstract';
+import { Visitor, Visitors, AbstractRootVisitor } from '../visitor/abstract';
 import { AbstractFeature, AbstractFeatureParseReturn, ParseChild } from '../features/abstract';
 import { Index, ParseError } from '../error';
 
@@ -17,7 +17,7 @@ enum ParseCharResult {
 }
 
 function* parseChars(
-    rootVisitor: Visitor<AbstractValueVisitor<any>>,
+    rootVisitor: Visitor<AbstractRootVisitor<any>>,
     rootFeatures: AbstractFeature[],
     visitors: Visitors,
 ) {
@@ -257,7 +257,7 @@ function* parseChars(
 
 export default function* parseStrings(
     firstIterator: Iterator<string>,
-    rootVisitor: Visitor<AbstractValueVisitor<any>>,
+    rootVisitor: Visitor<AbstractRootVisitor<any>>,
     rootFeatures: AbstractFeature[],
     visitors: Visitors,
 ) {

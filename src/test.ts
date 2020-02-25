@@ -1,7 +1,10 @@
 import 'source-map-support/register';
 
+import util from 'util';
+
 import parseString from './parse/source/string';
 import noMetadata from './parse/visitor/no-metadata';
+import astMetadata from './parse/visitor/ast-metadata';
 import BooleanFeature from './parse/features/boolean/boolean';
 import DoubleSlashCommentFeature from './parse/features/comment/double-slash';
 import DoubleDashCommentFeature from './parse/features/comment/double-dash';
@@ -74,9 +77,13 @@ const data = `
     }
 }
 `;
-const visitor = {
-    context: noMetadata.value.initialize(),
-    impl: noMetadata.value,
+const noMetadataVisitor = {
+    context: noMetadata.root.initialize(),
+    impl: noMetadata.root,
+};
+const astMetadataVisitor = {
+    context: astMetadata.root.initialize(),
+    impl: astMetadata.root,
 };
 const rootFeatures = [
     new RootFeature({
@@ -85,4 +92,10 @@ const rootFeatures = [
     }),
 ];
 
-console.log(parseString(data, visitor, rootFeatures, noMetadata));
+console.log(parseString(data, noMetadataVisitor, rootFeatures, noMetadata));
+console.log();
+
+const [value, ast] = parseString(data, astMetadataVisitor, rootFeatures, astMetadata);
+console.log(value);
+console.log();
+console.log(util.inspect(ast, { colors: true, depth: 20 }));

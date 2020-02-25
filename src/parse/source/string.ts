@@ -1,11 +1,11 @@
 import { Stringifiable } from '../../types/stringifiable';
 import parseStrings from './common';
-import { Visitor, Visitors, AbstractValueVisitor } from '../visitor/abstract';
+import { Visitor, Visitors, AbstractRootVisitor } from '../visitor/abstract';
 import { AbstractFeature } from '../features/abstract';
 
 export default function parseString(
     data: Stringifiable,
-    rootVisitor: Visitor<AbstractValueVisitor<any>>,
+    rootVisitor: Visitor<AbstractRootVisitor<any>>,
     rootFeatures: AbstractFeature[],
     visitors: Visitors,
 ) {

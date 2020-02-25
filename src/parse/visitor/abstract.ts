@@ -1,36 +1,48 @@
 import { VisitorContext } from './context';
 
-type MetadataValueAtom = boolean | number | string;
-export type MetadataValue = MetadataValueAtom | MetadataValueAtom[];
+export type MetadataValue = boolean | number | string;
 
 export interface AbstractVisitor<C extends VisitorContext> {
     _C: C;
 
-    addMetadata(context: C, kind: string, value: MetadataValue): void;
-    getMetadata(context: C, kind: string): MetadataValue | undefined;
+    pushInvisible(context: C, kind: string, value: MetadataValue): void;
+    setMetadata(context: C, kind: string, value: MetadataValue): void;
 
     visitValue(context: C, value: any): void;
 }
 
-export interface AbstractValueVisitor<C extends VisitorContext> extends AbstractVisitor<C> {
+export interface AbstractRootVisitor<
+    C extends VisitorContext,
+> extends AbstractVisitor<C> {
     initialize(): C;
     finalize(context: C): any;
 }
 
-export interface AbstractObjectVisitor<C extends VisitorContext> extends AbstractVisitor<C> {
-    initialize(): C;
+export interface AbstractObjectVisitor<
+    C extends VisitorContext,
+    PC extends VisitorContext,
+> extends AbstractVisitor<C> {
+    initialize(parent: PC): C;
     finalize(context: C): object;
 
     seedKey(context: C): Visitor<AbstractObjectKeyVisitor<any>>;
 }
 
-export interface AbstractObjectKeyVisitor<C extends VisitorContext> extends AbstractVisitor<C> {
+export interface AbstractObjectKeyVisitor<
+    C extends VisitorContext,
+> extends AbstractVisitor<C> {
     finalize(context: C): void;
+    abort(context: C): void;
 }
 
-export interface AbstractArrayVisitor<C extends VisitorContext> extends AbstractVisitor<C> {
-    initialize(): C;
+export interface AbstractArrayVisitor<
+    C extends VisitorContext,
+    PC extends VisitorContext,
+> extends AbstractVisitor<C> {
+    initialize(parent: PC): C;
     finalize(context: C): any[];
+
+    markNextValue(context: C): void;
 }
 
 export interface Visitor<V extends AbstractVisitor<any> = AbstractVisitor<any>> {
@@ -39,8 +51,8 @@ export interface Visitor<V extends AbstractVisitor<any> = AbstractVisitor<any>> 
 }
 
 export interface Visitors {
-    value: AbstractValueVisitor<VisitorContext>,
-    object: AbstractObjectVisitor<VisitorContext>,
+    root: AbstractRootVisitor<VisitorContext>,
+    object: AbstractObjectVisitor<VisitorContext, VisitorContext>,
     objectKey: AbstractObjectKeyVisitor<VisitorContext>,
-    array: AbstractArrayVisitor<VisitorContext>,
+    array: AbstractArrayVisitor<VisitorContext, VisitorContext>,
 }

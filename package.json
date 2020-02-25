@@ -37,6 +37,7 @@
         "typescript": "^3.7.5"
     },
     "dependencies": {
+        "@types/node": "^13.7.4",
         "source-map-support": "^0.5.16"
     }
 }

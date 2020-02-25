@@ -1,4 +1,4 @@
-import { Visitor, Visitors } from '../visitor/abstract';
+import { Visitors, Visitor } from '../visitor/abstract';
 
 export interface ParseChild {
     visitor: Visitor,

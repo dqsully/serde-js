@@ -1,5 +1,5 @@
 import {
-    AbstractValueVisitor,
+    AbstractRootVisitor,
     AbstractObjectVisitor,
     AbstractArrayVisitor,
     Visitors,
@@ -7,7 +7,7 @@ import {
 } from './abstract';
 import { VisitorContext } from './context';
 
-interface ValueContext extends VisitorContext {
+interface RootContext extends VisitorContext {
     value?: any;
 }
 interface ObjectContext extends VisitorContext {
@@ -18,26 +18,24 @@ interface ArrayContext extends VisitorContext {
     value: any[];
 }
 
-export type NoMetadataValueVisitor = AbstractValueVisitor<ValueContext>;
-const NoMetadataValueVisitor: NoMetadataValueVisitor = {
+export type NoMetadataValueVisitor = AbstractRootVisitor<RootContext>;
+const NoMetadataRootVisitor: NoMetadataValueVisitor = {
     _C: null!,
 
     initialize() {
         return VisitorContext.new();
     },
 
-    addMetadata() {},
-    getMetadata() {
-        return undefined;
-    },
+    pushInvisible() {},
+    setMetadata() {},
 
-    finalize(context: ValueContext) {
+    finalize(context: RootContext) {
         VisitorContext.assertIsSet(context, 'Did not visit a value');
 
         return context.value;
     },
 
-    visitValue(context: ValueContext, value: any) {
+    visitValue(context: RootContext, value: any) {
         VisitorContext.assertIsNotSet(context, 'Already visited a value');
         VisitorContext.set(context);
 
@@ -45,7 +43,7 @@ const NoMetadataValueVisitor: NoMetadataValueVisitor = {
     },
 };
 
-export type NoMetadataObjectVisitor = AbstractObjectVisitor<ObjectContext>;
+export type NoMetadataObjectVisitor = AbstractObjectVisitor<ObjectContext, any>;
 const NoMetadataObjectVisitor: NoMetadataObjectVisitor = {
     _C: null!,
 
@@ -57,10 +55,8 @@ const NoMetadataObjectVisitor: NoMetadataObjectVisitor = {
         };
     },
 
-    addMetadata() {},
-    getMetadata() {
-        return undefined;
-    },
+    pushInvisible() {},
+    setMetadata() {},
 
     finalize(context: ObjectContext) {
         VisitorContext.assertIsNotSet(context, 'Already finalized this object');
@@ -92,14 +88,17 @@ export type NoMetadataObjectKeyVisitor = AbstractObjectKeyVisitor<ObjectContext>
 const NoMetadataObjectKeyVisitor: NoMetadataObjectKeyVisitor = {
     _C: null!,
 
-    addMetadata() {},
-    getMetadata() {
-        return undefined;
-    },
+    pushInvisible() {},
+    setMetadata() {},
 
     finalize(context: ObjectContext) {
         VisitorContext.assertHasScratch(context, 'Did not visit a key');
-        VisitorContext.releaseLock(context);
+        VisitorContext.releaseLock(context, 'Key has already been finalized or aborted');
+    },
+
+    abort(context: ObjectContext) {
+        VisitorContext.assertDoesntHaveScratch(context, 'Visited a key but aborted');
+        VisitorContext.releaseLock(context, 'Key has already been finalized or aborted');
     },
 
     visitValue(context: ObjectContext, value: any) {
@@ -114,7 +113,7 @@ const NoMetadataObjectKeyVisitor: NoMetadataObjectKeyVisitor = {
     },
 };
 
-export type NoMetadataArrayVisitor = AbstractArrayVisitor<ArrayContext>;
+export type NoMetadataArrayVisitor = AbstractArrayVisitor<ArrayContext, any>;
 const NoMetadataArrayVisitor: NoMetadataArrayVisitor = {
     _C: null!,
 
@@ -125,10 +124,8 @@ const NoMetadataArrayVisitor: NoMetadataArrayVisitor = {
         };
     },
 
-    addMetadata() {},
-    getMetadata() {
-        return undefined;
-    },
+    pushInvisible() {},
+    setMetadata() {},
 
     finalize(context: ArrayContext) {
         VisitorContext.assertIsNotSet(context, 'Already finalized this array');
@@ -140,10 +137,12 @@ const NoMetadataArrayVisitor: NoMetadataArrayVisitor = {
     visitValue(context: ArrayContext, value: any) {
         context.value.push(value);
     },
+
+    markNextValue() {},
 };
 
 const visitors: Visitors = {
-    value: NoMetadataValueVisitor,
+    root: NoMetadataRootVisitor,
     object: NoMetadataObjectVisitor,
     objectKey: NoMetadataObjectKeyVisitor,
     array: NoMetadataArrayVisitor,

@@ -28,7 +28,7 @@ export default class StrictCommaArrayFeature extends AbstractFeature<Settings> {
             return () => `expected '${firstChar}' to be '[' for an array`;
         }
 
-        const arrContext = visitors.array.initialize();
+        const arrContext = visitors.array.initialize(visitor.context);
         const arrVisitor = {
             context: arrContext,
             impl: visitors.array,
@@ -66,6 +66,8 @@ export default class StrictCommaArrayFeature extends AbstractFeature<Settings> {
                 } else if (char !== ',') {
                     return () => `expected '${char}' to be ',' or ']' for a strict-comma array`;
                 }
+
+                visitors.array.markNextValue(arrContext);
 
                 // Parse any whitespace
                 yield {

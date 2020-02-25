@@ -1,28 +1,13 @@
 /* eslint-disable no-bitwise */
-// import { AbstractVisitor } from './abstract';
-
 export interface VisitorContext {
     state: number;
 }
-
-// export interface ChildVisitorContext<
-//     PC extends VisitorContext = VisitorContext,
-//     P extends AbstractVisitor<PC> = AbstractVisitor<PC>,
-// > extends VisitorContext {
-//     parent: PC;
-//     _P: P;
-// }
-
-// interface ProtoChildVisitorContext<
-//     PC extends VisitorContext,
-// > extends VisitorContext {
-//     parent: PC;
-// }
 
 export const INITIAL_STATE = 0;
 export const SET_FLAG = 0b0000_0001;
 export const SCRATCH_FLAG = 0b0000_0010;
 export const LOCK_FLAG = 0b0000_0100;
+export const NOT_EMPTY_FLAG = 0b0000_1000;
 
 export const VisitorContext = {
     new(): VisitorContext {
@@ -76,21 +61,25 @@ export const VisitorContext = {
         }
         context.state |= LOCK_FLAG;
     },
-    releaseLock(context: VisitorContext): void {
+    assertNotLocked(context: VisitorContext, message: string): void {
+        if (context.state & LOCK_FLAG) {
+            throw new Error(message);
+        }
+    },
+    releaseLock(context: VisitorContext, message: string): void {
+        if (!(context.state & LOCK_FLAG)) {
+            throw new Error(message);
+        }
         context.state &= ~LOCK_FLAG;
     },
+    hasLock(context: VisitorContext): boolean {
+        return !!(context.state & LOCK_FLAG);
+    },
+
+    setNotEmpty(context: VisitorContext): void {
+        context.state |= NOT_EMPTY_FLAG;
+    },
+    isEmpty(context: VisitorContext): boolean {
+        return !(context.state & NOT_EMPTY_FLAG);
+    },
 };
-
-// export const ChildVisitorContext = {
-//     new<
-//         PC extends VisitorContext,
-//         P extends AbstractVisitor<PC>
-//     >(parent: PC): ChildVisitorContext<PC, P> {
-//         const context: ProtoChildVisitorContext<PC> = {
-//             state: INITIAL_STATE,
-//             parent,
-//         };
-
-//         return context as ChildVisitorContext<PC, P>;
-//     },
-// };

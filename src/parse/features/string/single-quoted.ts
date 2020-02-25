@@ -7,7 +7,6 @@ export {
     Settings as SingleQuotedStringFeatureSettings,
 };
 
-// TODO: store string type in metadata
 export default class SingleQuotedStringFeature extends AbstractFeature<Settings> {
     public settings: Settings = {};
 
@@ -39,6 +38,7 @@ export default class SingleQuotedStringFeature extends AbstractFeature<Settings>
                 }
 
                 visitor.impl.visitValue(visitor.context, output.value);
+                visitor.impl.setMetadata(visitor.context, 'string.type', 'single-quoted');
 
                 return true;
             }
