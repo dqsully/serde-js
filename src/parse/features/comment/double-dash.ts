@@ -30,7 +30,7 @@ export default class DoubleDashCommentFeature extends AbstractFeature<Settings> 
             char = yield;
 
             if (char === undefined || char === '\n') {
-                visitor.impl.pushInvisible(visitor.context, 'comment.double-dash', comment);
+                visitor.impl.pushInvisible(visitor.context, 'comment.line.double-dash', comment);
 
                 return true;
             }

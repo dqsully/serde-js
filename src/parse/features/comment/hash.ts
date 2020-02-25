@@ -23,7 +23,7 @@ export default class HashCommentFeature extends AbstractFeature<Settings> {
             char = yield;
 
             if (char === undefined || char === '\n') {
-                visitor.impl.pushInvisible(visitor.context, 'comment.hash', comment);
+                visitor.impl.pushInvisible(visitor.context, 'comment.line.hash', comment);
 
                 return true;
             }

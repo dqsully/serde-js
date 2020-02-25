@@ -30,7 +30,7 @@ export default class DoubleSlashCommentFeature extends AbstractFeature<Settings>
             char = yield;
 
             if (char === undefined || char === '\n') {
-                visitor.impl.pushInvisible(visitor.context, 'comment.double-slash', comment);
+                visitor.impl.pushInvisible(visitor.context, 'comment.line.double-slash', comment);
 
                 return true;
             }

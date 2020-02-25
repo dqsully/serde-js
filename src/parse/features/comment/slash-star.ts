@@ -35,12 +35,12 @@ export default class SlashStarCommentFeature extends AbstractFeature<Settings> {
                     comment += lastChar;
                 }
 
-                visitor.impl.pushInvisible(visitor.context, 'comment.slash-star', comment);
+                visitor.impl.pushInvisible(visitor.context, 'comment.quoted.slash-star', comment);
 
                 return true;
             }
             if (lastChar === '*' && char === '/') {
-                visitor.impl.pushInvisible(visitor.context, 'comment.slash-star', comment);
+                visitor.impl.pushInvisible(visitor.context, 'comment.quoted.slash-star', comment);
 
                 return true;
             }
