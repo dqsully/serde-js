@@ -1,5 +1,5 @@
 import { Visitor } from '../../visitor/abstract';
-import { AbstractFeature, AbstractFeatureParseReturn } from '../abstract';
+import { AbstractFeature, AbstractFeatureParseReturn, FeatureResult } from '../abstract';
 
 interface Settings {
     whitespace: AbstractFeature[];
@@ -51,6 +51,6 @@ export default class RootFeature extends AbstractFeature<Settings> {
             return () => `expected '${char}' to be end of file `;
         }
 
-        return false;
+        return FeatureResult.Ignore;
     }
 }

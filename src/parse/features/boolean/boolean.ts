@@ -1,5 +1,5 @@
 import { Visitor } from '../../visitor/abstract';
-import { AbstractFeature, AbstractFeatureParseReturn } from '../abstract';
+import { AbstractFeature, AbstractFeatureParseReturn, FeatureResult } from '../abstract';
 
 const trueChars = 'true'.split('');
 const falseChars = 'false'.split('');
@@ -38,9 +38,12 @@ export default class BooleanFeature extends AbstractFeature<Settings> {
             }
         }
 
+        // TODO: yield to defer visiting, allowing another feature to test the
+        // chain
+
         visitor.impl.visitValue(visitor.context, variant === trueChars);
 
         // Commit all parsed chars
-        return true;
+        return FeatureResult.Commit;
     }
 }

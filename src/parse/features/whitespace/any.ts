@@ -1,5 +1,5 @@
 import { Visitor } from '../../visitor/abstract';
-import { AbstractFeature, AbstractFeatureParseReturn } from '../abstract';
+import { AbstractFeature, AbstractFeatureParseReturn, FeatureResult } from '../abstract';
 
 interface Settings {}
 export {
@@ -35,7 +35,7 @@ export default class AnyWhitespaceFeature extends AbstractFeature<Settings> {
             ) {
                 visitor.impl.pushInvisible(visitor.context, 'whitespace', whitespace);
 
-                return false;
+                return FeatureResult.Ignore;
             }
 
             whitespace += char;

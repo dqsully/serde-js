@@ -1,5 +1,5 @@
 import { Visitor } from '../../visitor/abstract';
-import { AbstractFeature, AbstractFeatureParseReturn } from '../abstract';
+import { AbstractFeature, AbstractFeatureParseReturn, FeatureResult } from '../abstract';
 
 interface Settings {}
 export {
@@ -25,7 +25,7 @@ export default class HashCommentFeature extends AbstractFeature<Settings> {
             if (char === undefined || char === '\n') {
                 visitor.impl.pushInvisible(visitor.context, 'comment.line.hash', comment);
 
-                return true;
+                return FeatureResult.Commit;
             }
 
             comment += char;

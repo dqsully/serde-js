@@ -1,9 +1,8 @@
 import { Visitor, Visitors } from '../../visitor/abstract';
-import { AbstractFeature, AbstractFeatureParseReturn } from '../abstract';
+import { AbstractFeature, AbstractFeatureParseReturn, FeatureResult } from '../abstract';
 
 interface Settings {
     whitespace: AbstractFeature[];
-    keyFeatures: AbstractFeature[];
     valueFeatures: AbstractFeature[];
 }
 export {
@@ -82,6 +81,6 @@ export default class StrictCommaArrayFeature extends AbstractFeature<Settings> {
         const value = visitors.array.finalize(arrContext);
         visitor.impl.visitValue(visitor.context, value);
 
-        return true;
+        return FeatureResult.Commit;
     }
 }

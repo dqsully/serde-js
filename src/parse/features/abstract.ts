@@ -7,9 +7,15 @@ export interface ParseChild {
     whitespaceMode?: boolean,
 }
 
+export enum FeatureResult {
+    Commit,
+    Ignore,
+    CommitUntilLast,
+}
+
 export type AbstractFeatureParseReturn = Generator<
     undefined | true | ParseChild,
-    boolean | (() => string),
+    FeatureResult | (() => string),
     string | undefined
 >;
 
@@ -30,6 +36,7 @@ export abstract class AbstractFeature<S extends object = object> {
 
     return `true` to commit the latest read chars and stop parsing
     return `false` to ignore the latest read chars, but stop parsing
+    return `-1` to redo
     return a string as a parser error message
 
     yields a single-character string when there's data left

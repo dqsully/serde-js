@@ -1,5 +1,7 @@
 import { Visitor, Visitors, AbstractRootVisitor } from '../visitor/abstract';
-import { AbstractFeature, AbstractFeatureParseReturn, ParseChild } from '../features/abstract';
+import {
+    AbstractFeature, AbstractFeatureParseReturn, ParseChild, FeatureResult,
+} from '../features/abstract';
 import { Index, ParseError } from '../error';
 
 interface StackFrame {
@@ -13,6 +15,7 @@ interface StackFrame {
 enum ParseCharResult {
     Next,
     CommitAndNext,
+    CommitAndRetry,
     Rewind,
 }
 
@@ -35,7 +38,7 @@ function* parseChars(
     let nextYield: ParseCharResult = ParseCharResult.Next;
     let featureReturn: IteratorResult<
         true | ParseChild | undefined,
-        boolean | (() => string)
+        FeatureResult | (() => string)
     >;
     let whitespaceMode: boolean = false;
 
@@ -143,10 +146,25 @@ function* parseChars(
             } else {
                 // The feature completed
 
-                if (featureReturn.value) {
-                    nextYield = ParseCharResult.CommitAndNext;
-                } else {
-                    nextYield = ParseCharResult.Rewind;
+                switch (featureReturn.value) {
+                    case FeatureResult.Commit: {
+                        nextYield = ParseCharResult.CommitAndNext;
+                        break;
+                    }
+
+                    case FeatureResult.CommitUntilLast: {
+                        nextYield = ParseCharResult.CommitAndRetry;
+                        break;
+                    }
+
+                    case FeatureResult.Ignore: {
+                        nextYield = ParseCharResult.Rewind;
+                        break;
+                    }
+
+                    default: {
+                        throw new Error('Unexpected feature return value');
+                    }
                 }
 
                 if (whitespaceMode) {
@@ -239,9 +257,16 @@ function* parseChars(
             }
         }
 
-        index.step(char);
+        if (nextYield === ParseCharResult.CommitAndRetry) {
+            index.commit();
+        } else {
+            index.step(char);
+        }
 
-        if (nextYield === ParseCharResult.CommitAndNext) {
+        if (
+            nextYield === ParseCharResult.CommitAndNext
+            || nextYield === ParseCharResult.CommitAndRetry
+        ) {
             index.commit();
         } else if (nextYield === ParseCharResult.Rewind) {
             index.rewind();
@@ -262,7 +287,7 @@ export default function* parseStrings(
     visitors: Visitors,
 ) {
     const parser = parseChars(rootVisitor, rootFeatures, visitors);
-    let parseResult;
+    let parseResult: IteratorResult<ParseCharResult, any>;
 
     let iterator: Iterator<string> | undefined = firstIterator;
     let iteratorResult: IteratorResult<string> | undefined;
@@ -298,32 +323,40 @@ export default function* parseStrings(
                     i = uncommittedStart - 1;
                 } else if (parseResult.value === ParseCharResult.CommitAndNext) {
                     uncommittedStart = i + 1;
+                } else if (parseResult.value === ParseCharResult.CommitAndRetry) {
+                    uncommittedStart = i;
+                    i -= 1;
                 }
             }
-        } else if (parseResult.value === ParseCharResult.CommitAndNext) {
+        } else if (
+            parseResult.value === ParseCharResult.CommitAndNext
+            || parseResult.value === ParseCharResult.CommitAndRetry
+        ) {
             uncommitted.length = 0;
             uncommittedStart = 0;
         } else if (char !== undefined) {
             uncommitted.push(char);
         }
 
-        if (iteratorResult === undefined || !iteratorResult.done) {
-            iteratorResult = iterator.next();
-
-            while (iteratorResult.done) {
-                const nextIterator: Iterator<string> | undefined = yield;
-
-                if (nextIterator === undefined) {
-                    // There's no more iterators to consume. All subsequent values
-                    // will be `undefined`
-                    break;
-                }
-
-                iterator = nextIterator;
+        if (parseResult.value !== ParseCharResult.CommitAndRetry) {
+            if (iteratorResult === undefined || !iteratorResult.done) {
                 iteratorResult = iterator.next();
-            }
-        }
 
-        char = iteratorResult.value;
+                while (iteratorResult.done) {
+                    const nextIterator: Iterator<string> | undefined = yield;
+
+                    if (nextIterator === undefined) {
+                        // There's no more iterators to consume. All subsequent values
+                        // will be `undefined`
+                        break;
+                    }
+
+                    iterator = nextIterator;
+                    iteratorResult = iterator.next();
+                }
+            }
+
+            char = iteratorResult.value;
+        }
     }
 }

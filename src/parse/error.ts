@@ -45,6 +45,19 @@ export class Index {
 
         return `${this.line}:${this.column}`;
     }
+
+    public clone() {
+        const index = new Index();
+
+        index.line = this.line;
+        index.column = this.column;
+        index.eof = this.eof;
+        index.committedLine = this.committedLine;
+        index.committedColumn = this.committedColumn;
+        index.committedEof = this.committedEof;
+
+        return index;
+    }
 }
 
 export class ParseError extends Error {

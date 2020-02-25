@@ -1,5 +1,5 @@
 import { Visitor } from '../../visitor/abstract';
-import { AbstractFeature, AbstractFeatureParseReturn } from '../abstract';
+import { AbstractFeature, AbstractFeatureParseReturn, FeatureResult } from '../abstract';
 import { unescape } from '../../../util/escape';
 
 interface Settings {}
@@ -14,7 +14,7 @@ export default class SingleQuotedStringFeature extends AbstractFeature<Settings>
     // eslint-disable-next-line class-methods-use-this
     public* parse(firstChar: string, visitor: Visitor): AbstractFeatureParseReturn {
         if (firstChar !== "'") {
-            return () => `expected '${firstChar}' to be ''' for a double-quoted string`;
+            return () => `expected '${firstChar}' to be ''' for a single-quoted string`;
         }
 
         const parser = unescape();
@@ -40,7 +40,7 @@ export default class SingleQuotedStringFeature extends AbstractFeature<Settings>
                 visitor.impl.visitValue(visitor.context, output.value);
                 visitor.impl.setMetadata(visitor.context, 'string.type', 'single-quoted');
 
-                return true;
+                return FeatureResult.Commit;
             }
 
             if (char === undefined) {

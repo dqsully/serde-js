@@ -1,5 +1,5 @@
 // import { Visitor } from '../../visitor/abstract';
-import { AbstractFeature, AbstractFeatureParseReturn } from '../abstract';
+import { AbstractFeature, AbstractFeatureParseReturn, FeatureResult } from '../abstract';
 
 interface Settings {}
 export {
@@ -13,6 +13,6 @@ export default class NothingFeature extends AbstractFeature<Settings> {
     // eslint-disable-next-line class-methods-use-this
     // eslint-disable-next-line require-yield
     public* parse(): AbstractFeatureParseReturn {
-        return false;
+        return FeatureResult.Ignore;
     }
 }

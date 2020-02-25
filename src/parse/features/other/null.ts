@@ -1,5 +1,5 @@
 import { Visitor } from '../../visitor/abstract';
-import { AbstractFeature, AbstractFeatureParseReturn } from '../abstract';
+import { AbstractFeature, AbstractFeatureParseReturn, FeatureResult } from '../abstract';
 
 const nullChars = 'null'.split('');
 
@@ -34,6 +34,6 @@ export default class NullFeature extends AbstractFeature<Settings> {
         visitor.impl.visitValue(visitor.context, null);
 
         // Commit all parsed chars
-        return true;
+        return FeatureResult.Commit;
     }
 }

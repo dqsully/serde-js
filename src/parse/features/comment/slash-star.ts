@@ -1,5 +1,5 @@
 import { Visitor } from '../../visitor/abstract';
-import { AbstractFeature, AbstractFeatureParseReturn } from '../abstract';
+import { AbstractFeature, AbstractFeatureParseReturn, FeatureResult } from '../abstract';
 
 interface Settings {}
 export {
@@ -37,12 +37,12 @@ export default class SlashStarCommentFeature extends AbstractFeature<Settings> {
 
                 visitor.impl.pushInvisible(visitor.context, 'comment.quoted.slash-star', comment);
 
-                return true;
+                return FeatureResult.Commit;
             }
             if (lastChar === '*' && char === '/') {
                 visitor.impl.pushInvisible(visitor.context, 'comment.quoted.slash-star', comment);
 
-                return true;
+                return FeatureResult.Commit;
             }
 
             if (lastChar !== undefined) {

@@ -18,6 +18,7 @@ import StrictCommaObjectFeature from './parse/features/object/strict-comma';
 import { AbstractFeature } from './parse/features/abstract';
 import NullFeature from './parse/features/other/null';
 import StrictCommaArrayFeature from './parse/features/array/strict-comma';
+import DecimalNumberFeature from './parse/features/number/decimal';
 
 const whitespace: AbstractFeature[] = [
     new AnyWhitespaceFeature(),
@@ -32,11 +33,13 @@ const valueFeatures: AbstractFeature[] = [
     new BooleanFeature(),
     new DoubleQuotedStringFeature(),
     new SingleQuotedStringFeature(),
+    new DecimalNumberFeature(),
     // StrictCommaObjectFeature (placeholder)
     // StrictCommaArrayFeature (placeholder)
 ];
 const keyFeatures: AbstractFeature[] = [
     new DoubleQuotedStringFeature(),
+    new SingleQuotedStringFeature(),
 ];
 
 valueFeatures.push(
@@ -48,7 +51,6 @@ valueFeatures.push(
 );
 valueFeatures.push(
     new StrictCommaArrayFeature({
-        keyFeatures,
         valueFeatures,
         whitespace,
     }),
@@ -58,7 +60,7 @@ const data = `
 {
     // line comment
     "foo" /* in the weird places */ : "bar" /* yup weird */,
-    "foo2": "bar2",
+    'foo2': "bar2",
     "object": {
         "lol": "it works!!!",
 
@@ -73,6 +75,19 @@ const data = `
             # comment there
             true
             -- comment everywhere!!!
+        ],
+
+        'numbers': [
+            0,
+            -0,
+            5,
+            -5,
+            60,
+            3.14,
+            -1.693,
+            6.836e5,
+            15E-10,
+            -4e7
         ]
     }
 }
