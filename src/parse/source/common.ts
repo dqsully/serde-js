@@ -302,9 +302,8 @@ function* parseChars(
                 const currentFillers: ActivePeeker[] = new Array(fillers.length);
 
                 let resetPeekers = true;
-                let retry = false;
+                let retry = true;
                 let done = false;
-                let firstYield = true;
                 const peekErrors: ParseErrorRaw[] = [];
 
                 let i;
@@ -312,14 +311,13 @@ function* parseChars(
                 let result: IteratorResult<undefined, boolean | (() => string)>;
                 let foundActivePeeker;
 
+                // Take the next char and start peeking, but tell the loop not
+                // to get another char by setting `retry` to true
+                char = yield ParseCharResult.BeginPeek;
+
                 while (!done) {
                     if (!retry) {
-                        if (firstYield) {
-                            firstYield = false;
-                            char = yield ParseCharResult.BeginPeek;
-                        } else {
-                            char = yield ParseCharResult.Next;
-                        }
+                        char = yield ParseCharResult.Next;
 
                         index.step(char);
                     } else {
@@ -327,6 +325,9 @@ function* parseChars(
                     }
 
                     if (resetPeekers) {
+                        // One of the peekers completed, or we need to
+                        // initialize them
+
                         if (char === undefined) {
                             throw new ParseError(
                                 index,
@@ -344,6 +345,7 @@ function* parseChars(
 
                     foundActivePeeker = false;
 
+                    // Test all the finalizers first
                     for (i = 0; i < finalizers.length; i += 1) {
                         peeker = currentFinalizers[i];
 
@@ -372,10 +374,12 @@ function* parseChars(
                         }
                     }
 
+                    // Break if a finalizer finished
                     if (done) {
                         break;
                     }
 
+                    // Test all the fillers
                     for (i = 0; i < fillers.length; i += 1) {
                         peeker = currentFillers[i];
 
@@ -399,6 +403,8 @@ function* parseChars(
                         }
                     }
 
+                    // If no peekers are still active, add the errors to the
+                    // list and rewind to run the next feature
                     if (!foundActivePeeker) {
                         if (committed) {
                             // The feature that requested to peek had already
@@ -413,27 +419,29 @@ function* parseChars(
                             );
                         }
 
+                        // Commit the peek errors to the feature errors list
                         errors.push(...peekErrors);
+
+                        // Rewind and run the next feature
                         nextYield = ParseCharResult.Rewind;
+                        featureIndex += 1;
+                        liveFeature = undefined;
                         break;
                     }
                 }
             }
         }
 
-        if (nextYield === ParseCharResult.CommitAndRetry) {
-            index.commit();
-        } else {
-            index.step(char);
-        }
-
-        if (
-            nextYield === ParseCharResult.Commit
-            || nextYield === ParseCharResult.CommitAndRetry
-        ) {
-            index.commit();
-        } else if (nextYield === ParseCharResult.Rewind) {
+        if (nextYield & ParseCharResult.Rewind) {
             index.rewind();
+        } else {
+            if (!(nextYield & ParseCharResult.Retry)) {
+                index.step(char);
+            }
+
+            if (nextYield & ParseCharResult.Commit) {
+                index.commit();
+            }
         }
     }
 
