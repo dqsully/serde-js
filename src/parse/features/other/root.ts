@@ -1,5 +1,7 @@
 import { Visitor } from '../../visitor/abstract';
-import { AbstractFeature, AbstractFeatureParseReturn, FeatureResult } from '../abstract';
+import {
+    AbstractFeature, AbstractFeatureParseReturn, FeatureResult, FeatureAction,
+} from '../abstract';
 
 interface Settings {
     whitespace: AbstractFeature[];
@@ -23,6 +25,7 @@ export default class RootFeature extends AbstractFeature<Settings> {
         if (this.settings.whitespace.length > 0) {
             // Try and parse whitespace first
             yield {
+                action: FeatureAction.ParseChild,
                 features: this.settings.whitespace,
                 visitor,
                 commitUntilNow: false,
@@ -32,6 +35,7 @@ export default class RootFeature extends AbstractFeature<Settings> {
 
         // Parse the root feature
         let char = yield {
+            action: FeatureAction.ParseChild,
             features: this.settings.rootFeatures,
             visitor,
             commitUntilNow: false,
@@ -40,6 +44,7 @@ export default class RootFeature extends AbstractFeature<Settings> {
         if (char !== undefined && this.settings.whitespace.length > 0) {
             // Try and finish with whitespace
             char = yield {
+                action: FeatureAction.ParseChild,
                 features: this.settings.whitespace,
                 visitor,
                 commitUntilNow: false,

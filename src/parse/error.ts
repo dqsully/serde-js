@@ -58,6 +58,24 @@ export class Index {
 
         return index;
     }
+
+    public ref(): IndexRef {
+        return {
+            line: this.line,
+            column: this.column,
+            eof: this.eof,
+
+            toString: this.toString,
+        };
+    }
+}
+
+export interface IndexRef {
+    line: number;
+    column: number;
+    eof: boolean;
+
+    toString(this: IndexRef): string;
 }
 
 export class ParseError extends Error {

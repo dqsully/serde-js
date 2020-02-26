@@ -1,5 +1,7 @@
 import { Visitor, Visitors } from '../../visitor/abstract';
-import { AbstractFeature, AbstractFeatureParseReturn, FeatureResult } from '../abstract';
+import {
+    AbstractFeature, AbstractFeatureParseReturn, FeatureResult, FeatureAction,
+} from '../abstract';
 
 interface Settings {
     whitespace: AbstractFeature[];
@@ -42,6 +44,7 @@ export default class StrictCommaObjectFeature extends AbstractFeature<Settings> 
 
             // Parse any whitespace
             char = yield {
+                action: FeatureAction.ParseChild,
                 features: this.settings.whitespace,
                 visitor: keyVisitor,
                 commitUntilNow: true,
@@ -55,6 +58,7 @@ export default class StrictCommaObjectFeature extends AbstractFeature<Settings> 
 
             // Parse a key
             yield {
+                action: FeatureAction.ParseChild,
                 features: this.settings.keyFeatures,
                 visitor: keyVisitor,
                 commitUntilNow: false,
@@ -62,6 +66,7 @@ export default class StrictCommaObjectFeature extends AbstractFeature<Settings> 
 
             // Parse any whitespace
             char = yield {
+                action: FeatureAction.ParseChild,
                 features: this.settings.whitespace,
                 visitor: keyVisitor,
                 commitUntilNow: false,
@@ -78,6 +83,7 @@ export default class StrictCommaObjectFeature extends AbstractFeature<Settings> 
 
             // Parse any whitespace
             yield {
+                action: FeatureAction.ParseChild,
                 features: this.settings.whitespace,
                 visitor: objVisitor,
                 commitUntilNow: true,
@@ -86,6 +92,7 @@ export default class StrictCommaObjectFeature extends AbstractFeature<Settings> 
 
             // Parse a value
             yield {
+                action: FeatureAction.ParseChild,
                 features: this.settings.valueFeatures,
                 visitor: objVisitor,
                 commitUntilNow: false,
@@ -93,6 +100,7 @@ export default class StrictCommaObjectFeature extends AbstractFeature<Settings> 
 
             // Parse any whitespace
             char = yield {
+                action: FeatureAction.ParseChild,
                 features: this.settings.whitespace,
                 visitor: objVisitor,
                 commitUntilNow: false,

@@ -1,8 +1,9 @@
-import { Visitor } from '../../visitor/abstract';
+import { Visitor, Visitors } from '../../visitor/abstract';
 import {
     AbstractFeature,
     AbstractFeatureParseReturn,
     FeatureResult,
+    PeekAhead,
 } from '../abstract';
 
 interface Settings {}
@@ -25,7 +26,13 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
 
     // We don't use `this` because there are no settings for `DecimalNumberFeature`
     // eslint-disable-next-line class-methods-use-this
-    public* parse(firstChar: string, visitor: Visitor): AbstractFeatureParseReturn {
+    public* parse(
+        firstChar: string,
+        visitor: Visitor,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        _visitors: Visitors,
+        peekFinalizers?: PeekAhead,
+    ): AbstractFeatureParseReturn {
         let numberStr = '';
 
         let wholeIsZero = false;
@@ -83,7 +90,9 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
 
                 state = NumberState.ExponentPart;
             } else if (wholeIsZero) {
-                // TODO: yield to defer visiting and allow parsing ahead
+                if (peekFinalizers !== undefined) {
+                    yield peekFinalizers;
+                }
 
                 finalizeAndVisit();
                 return FeatureResult.CommitUntilLast;
@@ -96,7 +105,9 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
 
                 foundWholeDigit = true;
             } else {
-                // TODO: yield to defer visiting and allow parsing ahead
+                if (peekFinalizers !== undefined) {
+                    yield peekFinalizers;
+                }
 
                 finalizeAndVisit();
                 return FeatureResult.CommitUntilLast;
@@ -124,7 +135,9 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
 
                 foundDecimalDigit = true;
             } else {
-                // TODO: yield to defer visiting and allow parsing ahead
+                if (peekFinalizers !== undefined) {
+                    yield peekFinalizers;
+                }
 
                 finalizeAndVisit();
                 return FeatureResult.CommitUntilLast;
@@ -156,7 +169,9 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
 
                 foundExponentDigit = true;
             } else {
-                // TODO: yield to defer visiting and allow parsing ahead
+                if (peekFinalizers !== undefined) {
+                    yield peekFinalizers;
+                }
 
                 finalizeAndVisit();
                 return FeatureResult.CommitUntilLast;

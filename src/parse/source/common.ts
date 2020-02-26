@@ -1,8 +1,15 @@
+/* eslint-disable no-bitwise */
 import { Visitor, Visitors, AbstractRootVisitor } from '../visitor/abstract';
 import {
-    AbstractFeature, AbstractFeatureParseReturn, ParseChild, FeatureResult,
+    AbstractFeature,
+    AbstractFeatureParseReturn,
+    ParseChild,
+    FeatureResult,
+    PeekAhead,
+    FeatureAction,
+    AbstractFeaturePeekReturn,
 } from '../features/abstract';
-import { Index, ParseError } from '../error';
+import { Index, ParseError, IndexRef } from '../error';
 
 interface StackFrame {
     visitor: Visitor,
@@ -10,13 +17,29 @@ interface StackFrame {
     featureIndex: number,
     liveFeature: AbstractFeatureParseReturn,
     whitespaceMode: boolean,
+    peekFinalizers: PeekAhead | undefined,
 }
 
 enum ParseCharResult {
-    Next,
-    CommitAndNext,
-    CommitAndRetry,
-    Rewind,
+    Next = 0b0000,
+
+    Rewind = 0b0001,
+    Retry = 0b0010,
+    BeginPeek = 0b0100,
+    Commit = 0b1000,
+
+    // Commit and Rewind are mutually exclusive
+    // BeginPeek and Rewind are mutually exclusive
+    // Rewind and Retry are mutually exclusive
+    // The only one left is CommitAndBeginPeek, which is unused
+
+    BeginPeekAndRetry = 0b0110,
+    CommitAndRetry = 0b1010,
+}
+
+interface ParseErrorRaw {
+    location: IndexRef;
+    message: () => string;
 }
 
 function* parseChars(
@@ -31,16 +54,17 @@ function* parseChars(
     let features = rootFeatures;
     let featureIndex = 0;
     let liveFeature: AbstractFeatureParseReturn | undefined;
-    let errors: (() => string)[] = [];
+    let errors: ParseErrorRaw[] = [];
     let committed = false;
 
     let char: string | undefined;
     let nextYield: ParseCharResult = ParseCharResult.Next;
     let featureReturn: IteratorResult<
-        true | ParseChild | undefined,
+        true | ParseChild | PeekAhead | undefined,
         FeatureResult | (() => string)
     >;
     let whitespaceMode: boolean = false;
+    let peekFinalizers: PeekAhead | undefined;
 
     while (true) {
         // console.log(`yield: ${ParseCharResult[nextYield]}`);
@@ -87,6 +111,7 @@ function* parseChars(
                         featureIndex,
                         liveFeature,
                         whitespaceMode,
+                        peekFinalizers,
                     } = frame);
 
                     featureReturn = liveFeature.next(char);
@@ -99,7 +124,7 @@ function* parseChars(
                     // All features have been tested and failed, throw all their
                     // errors at once
                     const errorsStr = errors
-                        .map((fn) => `\n   ${fn()}`)
+                        .map((err) => `\n    at ${err.location} ${err.message()}`)
                         .join('');
 
                     throw new ParseError(
@@ -109,7 +134,12 @@ function* parseChars(
                 }
             } else {
                 // Initialize the new feature
-                liveFeature = features[featureIndex].parse(char, visitor, visitors);
+                liveFeature = features[featureIndex].parse(
+                    char,
+                    visitor,
+                    visitors,
+                    peekFinalizers,
+                );
 
                 // Generators don't use yielded arguments on the first `next` call
                 featureReturn = liveFeature.next();
@@ -136,7 +166,10 @@ function* parseChars(
                 }
 
                 if (!whitespaceMode) {
-                    errors.push(featureReturn.value);
+                    errors.push({
+                        location: index.ref(),
+                        message: featureReturn.value,
+                    });
                 }
 
                 // We hit an error, so rewind and try the next feature
@@ -148,7 +181,7 @@ function* parseChars(
 
                 switch (featureReturn.value) {
                     case FeatureResult.Commit: {
-                        nextYield = ParseCharResult.CommitAndNext;
+                        nextYield = ParseCharResult.Commit;
                         break;
                     }
 
@@ -187,7 +220,7 @@ function* parseChars(
                             );
                         }
 
-                        char = yield ParseCharResult.CommitAndNext;
+                        char = yield ParseCharResult.Commit;
 
                         index.step(char);
 
@@ -213,47 +246,178 @@ function* parseChars(
                         featureIndex,
                         liveFeature,
                         whitespaceMode,
+                        peekFinalizers,
                     } = frame);
                 }
             }
         } else if (featureReturn.value === true) {
             // The feature yielded true
 
-            nextYield = ParseCharResult.CommitAndNext;
+            nextYield = ParseCharResult.Commit;
             committed = true;
         } else if (featureReturn.value !== undefined) {
-            // The feature yielded a sub-feature
+            if (featureReturn.value.action === FeatureAction.ParseChild) {
+                // The feature yielded a sub-feature
 
-            stack.push({
-                visitor,
-                features,
-                featureIndex,
-                liveFeature,
-                whitespaceMode,
-            });
+                stack.push({
+                    visitor,
+                    features,
+                    featureIndex,
+                    liveFeature,
+                    whitespaceMode,
+                    peekFinalizers,
+                });
 
-            let commitUntilNow;
+                let commitUntilNow;
 
-            ({
-                visitor,
-                features,
-                commitUntilNow,
-                whitespaceMode = false,
-            } = featureReturn.value);
-            featureIndex = 0;
-            liveFeature = undefined;
+                ({
+                    visitor,
+                    features,
+                    commitUntilNow,
+                    whitespaceMode = false,
+                    peekFinalizers,
+                } = featureReturn.value);
+                featureIndex = 0;
+                liveFeature = undefined;
 
-            // Regardless of what the parent feature chooses, we are starting a
-            // new frame with no inherent side effects yet
-            committed = false;
-            errors = [];
+                // Regardless of what the parent feature chooses, we are starting a
+                // new frame with no inherent side effects yet
+                committed = false;
+                errors = [];
 
-            if (commitUntilNow) {
-                // Committing will not affect the new frame's purity, so don't
-                // set `committed` to true
-                nextYield = ParseCharResult.CommitAndNext;
+                if (commitUntilNow) {
+                    // Committing will not affect the new frame's purity, so don't
+                    // set `committed` to true
+                    nextYield = ParseCharResult.Commit;
+                } else {
+                    nextYield = ParseCharResult.Rewind;
+                }
             } else {
-                nextYield = ParseCharResult.Rewind;
+                // The feature yielded a peek ahead case
+
+                const { finalizers, fillers } = featureReturn.value;
+
+                type ActivePeeker = AbstractFeaturePeekReturn | undefined;
+                const currentFinalizers: ActivePeeker[] = new Array(finalizers.length);
+                const currentFillers: ActivePeeker[] = new Array(fillers.length);
+
+                let resetPeekers = true;
+                let retry = false;
+                let done = false;
+                let firstYield = true;
+                const peekErrors: ParseErrorRaw[] = [];
+
+                let i;
+                let peeker;
+                let result: IteratorResult<undefined, boolean | (() => string)>;
+                let foundActivePeeker;
+
+                while (!done) {
+                    if (!retry) {
+                        if (firstYield) {
+                            firstYield = false;
+                            char = yield ParseCharResult.BeginPeek;
+                        } else {
+                            char = yield ParseCharResult.Next;
+                        }
+
+                        index.step(char);
+                    } else {
+                        retry = false;
+                    }
+
+                    if (resetPeekers) {
+                        if (char === undefined) {
+                            throw new ParseError(
+                                index,
+                                'Found end of file while instantiating peeker',
+                            );
+                        }
+
+                        for (i = 0; i < finalizers.length; i += 1) {
+                            currentFinalizers[i] = finalizers[i].peek(char);
+                        }
+                        for (i = 0; i < fillers.length; i += 1) {
+                            currentFillers[i] = fillers[i].peek(char);
+                        }
+                    }
+
+                    foundActivePeeker = false;
+
+                    for (i = 0; i < finalizers.length; i += 1) {
+                        peeker = currentFinalizers[i];
+
+                        if (peeker !== undefined) {
+                            foundActivePeeker = true;
+                            result = peeker.next(char);
+
+                            if (result.done) {
+                                if (typeof result.value === 'function') {
+                                    peekErrors.push({
+                                        location: index.ref(),
+                                        message: result.value,
+                                    });
+                                    currentFinalizers[i] = undefined;
+                                } else {
+                                    if (result.value) {
+                                        nextYield = ParseCharResult.Commit;
+                                    } else {
+                                        nextYield = ParseCharResult.CommitAndRetry;
+                                    }
+
+                                    done = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (done) {
+                        break;
+                    }
+
+                    for (i = 0; i < fillers.length; i += 1) {
+                        peeker = currentFillers[i];
+
+                        if (peeker !== undefined) {
+                            foundActivePeeker = true;
+                            result = peeker.next(char);
+
+                            if (result.done) {
+                                if (typeof result.value === 'function') {
+                                    peekErrors.push({
+                                        location: index.ref(),
+                                        message: result.value,
+                                    });
+                                    currentFillers[i] = undefined;
+                                } else {
+                                    retry = !result.value;
+                                    resetPeekers = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (!foundActivePeeker) {
+                        if (committed) {
+                            // The feature that requested to peek had already
+                            // committed chars, so we can't rewind far enough
+                            const errorsStr = peekErrors
+                                .map((err) => `\n    at ${err.location} ${err.message()}`)
+                                .join('');
+
+                            throw new ParseError(
+                                index,
+                                `Peek errors after side effect:${errorsStr}`,
+                            );
+                        }
+
+                        errors.push(...peekErrors);
+                        nextYield = ParseCharResult.Rewind;
+                        break;
+                    }
+                }
             }
         }
 
@@ -264,7 +428,7 @@ function* parseChars(
         }
 
         if (
-            nextYield === ParseCharResult.CommitAndNext
+            nextYield === ParseCharResult.Commit
             || nextYield === ParseCharResult.CommitAndRetry
         ) {
             index.commit();
@@ -280,21 +444,20 @@ function* parseChars(
     return rootVisitor.impl.finalize(rootVisitor.context);
 }
 
-export default function* parseStrings(
+export function* parseStringsWithParser(
     firstIterator: Iterator<string>,
-    rootVisitor: Visitor<AbstractRootVisitor<any>>,
-    rootFeatures: AbstractFeature[],
-    visitors: Visitors,
+    parser: ReturnType<typeof parseChars>,
 ) {
-    const parser = parseChars(rootVisitor, rootFeatures, visitors);
     let parseResult: IteratorResult<ParseCharResult, any>;
 
     let iterator: Iterator<string> | undefined = firstIterator;
     let iteratorResult: IteratorResult<string> | undefined;
     let char: string | undefined;
 
+    // uncommitted indicies refer to the first char of any state
     const uncommitted: string[] = [];
     let uncommittedStart = 0;
+    let peekStart: number | undefined;
 
     while (true) {
         parseResult = parser.next(char);
@@ -303,13 +466,33 @@ export default function* parseStrings(
             return parseResult.value;
         }
 
-        if (parseResult.value === ParseCharResult.Rewind) {
+        if (
+            parseResult.value & ParseCharResult.Rewind
+            || (
+                (parseResult.value & ParseCharResult.Commit)
+                && peekStart !== undefined
+            )
+        ) {
+            // We are rewinding to either the uncommitted start or the peek start
+
             if (char !== undefined) {
+                // Make sure the current char is saved
                 uncommitted.push(char);
+            }
+
+            if (peekStart !== undefined) {
+                // Rewind and commit to peek start
+                uncommittedStart = peekStart;
+
+                // Stop peeking
+                peekStart = undefined;
+
+                // Ignore the retry flag
             }
 
             const uncommittedEnd = uncommitted.length;
 
+            // Loop over all the uncommitted characters
             for (let i = uncommittedStart; i < uncommittedEnd; i += 1) {
                 char = uncommitted[i];
 
@@ -319,26 +502,71 @@ export default function* parseStrings(
                     return parseResult.value;
                 }
 
-                if (parseResult.value === ParseCharResult.Rewind) {
+                if (
+                    peekStart !== undefined
+                    && parseResult.value & ParseCharResult.BeginPeek
+                    && !(parseResult.value & ParseCharResult.Commit)
+                ) {
+                    throw new Error('Already peeking');
+                }
+
+                if (parseResult.value & ParseCharResult.Rewind) {
+                    if (peekStart !== undefined) {
+                        // Cancel peek and rewind all the way
+                        peekStart = undefined;
+                    }
+
                     i = uncommittedStart - 1;
-                } else if (parseResult.value === ParseCharResult.CommitAndNext) {
-                    uncommittedStart = i + 1;
-                } else if (parseResult.value === ParseCharResult.CommitAndRetry) {
-                    uncommittedStart = i;
-                    i -= 1;
+                } else {
+                    if (
+                        peekStart !== undefined
+                        && parseResult.value & ParseCharResult.Commit
+                    ) {
+                        // Cancel peek and rewind to peek start, ignoring retry flag
+                        i = peekStart - 1;
+                        peekStart = undefined;
+                    } else if (parseResult.value & ParseCharResult.Retry) {
+                        // Rewind one character
+                        i -= 1;
+                    }
+
+                    if (parseResult.value & ParseCharResult.Commit) {
+                        // Commit all including the current character
+                        uncommittedStart = i + 1;
+                    }
+
+                    if (parseResult.value & ParseCharResult.BeginPeek) {
+                        // Begin peeking with the next character
+                        peekStart = i + 1;
+                    }
                 }
             }
-        } else if (
-            parseResult.value === ParseCharResult.CommitAndNext
-            || parseResult.value === ParseCharResult.CommitAndRetry
-        ) {
-            uncommitted.length = 0;
-            uncommittedStart = 0;
-        } else if (char !== undefined) {
-            uncommitted.push(char);
+        } else {
+            if (parseResult.value & ParseCharResult.Commit) {
+                // We must not be peeking because of an earlier if clause, so
+                // go ahead and clear out the uncommitted buffer
+                uncommitted.length = 0;
+                uncommittedStart = 0;
+            } else if (
+                char !== undefined
+                && !(parseResult.value & ParseCharResult.Retry)
+            ) {
+                // If we aren't retrying, go ahead and push the char to the
+                // uncommitted stack
+                uncommitted.push(char);
+            }
+
+            if (parseResult.value & ParseCharResult.BeginPeek) {
+                if (peekStart !== undefined) {
+                    throw new Error('Already peeking');
+                }
+
+                // Begin peeking with the next character
+                peekStart = uncommitted.length;
+            }
         }
 
-        if (parseResult.value !== ParseCharResult.CommitAndRetry) {
+        if (!(parseResult.value & ParseCharResult.Retry)) {
             if (iteratorResult === undefined || !iteratorResult.done) {
                 iteratorResult = iterator.next();
 
@@ -346,8 +574,8 @@ export default function* parseStrings(
                     const nextIterator: Iterator<string> | undefined = yield;
 
                     if (nextIterator === undefined) {
-                        // There's no more iterators to consume. All subsequent values
-                        // will be `undefined`
+                        // There will be no more iterators to consume. All
+                        // subsequent values will be `undefined`
                         break;
                     }
 
@@ -359,4 +587,15 @@ export default function* parseStrings(
             char = iteratorResult.value;
         }
     }
+}
+
+export default function parseStrings(
+    firstIterator: Iterator<string>,
+    rootVisitor: Visitor<AbstractRootVisitor<any>>,
+    rootFeatures: AbstractFeature[],
+    visitors: Visitors,
+) {
+    const parser = parseChars(rootVisitor, rootFeatures, visitors);
+
+    return parseStringsWithParser(firstIterator, parser);
 }

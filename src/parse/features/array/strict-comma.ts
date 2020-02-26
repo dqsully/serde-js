@@ -1,5 +1,7 @@
 import { Visitor, Visitors } from '../../visitor/abstract';
-import { AbstractFeature, AbstractFeatureParseReturn, FeatureResult } from '../abstract';
+import {
+    AbstractFeature, AbstractFeatureParseReturn, FeatureResult, FeatureAction,
+} from '../abstract';
 
 interface Settings {
     whitespace: AbstractFeature[];
@@ -35,6 +37,7 @@ export default class StrictCommaArrayFeature extends AbstractFeature<Settings> {
 
         // Parse any whitespace
         yield {
+            action: FeatureAction.ParseChild,
             features: this.settings.whitespace,
             visitor: arrVisitor,
             commitUntilNow: true,
@@ -47,6 +50,7 @@ export default class StrictCommaArrayFeature extends AbstractFeature<Settings> {
             while (true) {
                 // Parse a value
                 yield {
+                    action: FeatureAction.ParseChild,
                     features: this.settings.valueFeatures,
                     visitor: arrVisitor,
                     commitUntilNow: false,
@@ -54,6 +58,7 @@ export default class StrictCommaArrayFeature extends AbstractFeature<Settings> {
 
                 // Parse any whitespace
                 char = yield {
+                    action: FeatureAction.ParseChild,
                     features: this.settings.whitespace,
                     visitor: arrVisitor,
                     commitUntilNow: false,
@@ -70,6 +75,7 @@ export default class StrictCommaArrayFeature extends AbstractFeature<Settings> {
 
                 // Parse any whitespace
                 yield {
+                    action: FeatureAction.ParseChild,
                     features: this.settings.whitespace,
                     visitor: arrVisitor,
                     commitUntilNow: true,
