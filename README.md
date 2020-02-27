@@ -96,6 +96,7 @@ This one isn't as pretty, but it's Input -> (Stringifier Engine -> Tokenizer) ->
         * [X] Double-slash comment
         * [X] Slash-star comment
         * [X] Hash comment
+        * [ ] Single-line whitespace
 
 * Stringifiable languages
     * [ ] JSON
@@ -136,6 +137,7 @@ This one isn't as pretty, but it's Input -> (Stringifier Engine -> Tokenizer) ->
         * [ ] Double-slash comment (untested)
         * [ ] Slash-star comment (untested)
         * [ ] Hash comment (untested)
+        * [ ] Single-line whitespace
 
 * In-memory formats
     * [X] Just the data
