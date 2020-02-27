@@ -41,10 +41,11 @@ function check(
         lowerStart = lowerEnd;
     }
 
-    let printable = true;
+    let passing = false;
     let v = 0;
     let c = x;
 
+    // Test all the normal ranges, assuming no range is 0 in length
     for (n of normal) {
         if ((v & 0x8000) !== 0) {
             v |= n;
@@ -56,7 +57,7 @@ function check(
 
             v = 0;
 
-            printable = !printable;
+            passing = !passing;
         } else if ((n & 0x80) !== 0) {
             v = (n & 0xff) << 8;
         } else {
@@ -65,14 +66,14 @@ function check(
                 break;
             }
 
-            printable = !printable;
+            passing = !passing;
         }
     }
 
-    return printable;
+    return passing;
 }
 
-export default function isPrintable(x: number): boolean {
+export default function isUnprintable(x: number): boolean {
     const lower = x & 0xffff;
 
     if (x < 0x10000) {

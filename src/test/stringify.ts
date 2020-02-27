@@ -36,7 +36,7 @@ const features: TokenFeatures = {
     root: fakeRootFeature,
 };
 
-const data = 'test string\nwith\tescapes, emoji (\ud83d\udc0e\ud83d\udc71\u2764), unprintables(\uFFFF, \x1f) and others: \uD835\uDC68';
+const data = 'test string\nwith\tescapes, emoji (\ud83d\udc0e\ud83d\udc71\u2764🏳️‍🌈), unprintables(\uFFFF, \x1f) and others: \uD835\uDC68 Z͑ͫ̓ͪ̂ͫ̽͏̴̙̤̞͉͚̯̞̠͍A̴̵̜̰͔ͫ͗͢L̠ͨͧͩ͘G̴̻͈͍͔̹̑͗̎̅͛́Ǫ̵̹̻̝̳͂̌̌͘';
 
 console.log(util.inspect(data, { colors: true }));
 console.log(intoString(data, fakeTokenizer, features));

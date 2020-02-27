@@ -1,4 +1,5 @@
-import isPrintable from './printable';
+import isUnprintable from './printable';
+import isGraphemeExtend from './grapheme-extend';
 
 function isHex(char: string) {
     return /[0-9a-fA-F]/.test(char);
@@ -167,7 +168,7 @@ export function escape(string: string, quote?: string) {
         } else {
             codepoint = char.codePointAt(0)!;
 
-            if (!isPrintable(codepoint)) {
+            if (isUnprintable(codepoint) || isGraphemeExtend(codepoint)) {
                 output += string.slice(lastIndex, i);
 
                 if (codepoint <= 0xff) {
