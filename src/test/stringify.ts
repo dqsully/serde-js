@@ -1,5 +1,3 @@
-import util from 'util';
-
 import intoString from '../stringify/sink/string';
 import { doubleQuotedStringDefaultFeature } from '../stringify/features/string/double-quoted';
 import { TokenFeatures } from '../stringify/sink/common';
