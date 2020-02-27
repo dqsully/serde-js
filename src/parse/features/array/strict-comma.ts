@@ -35,16 +35,16 @@ export default class StrictCommaArrayFeature extends AbstractFeature<Settings> {
             impl: visitors.array,
         };
 
+        let char: string | undefined;
+
         // Parse any whitespace
-        yield {
+        char = yield {
             action: FeatureAction.ParseChild,
             features: this.settings.whitespace,
             visitor: arrVisitor,
             commitUntilNow: true,
             whitespaceMode: true,
         };
-
-        let char = yield;
 
         if (char !== ']') {
             while (true) {

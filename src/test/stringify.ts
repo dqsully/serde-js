@@ -1,42 +1,44 @@
 import util from 'util';
 
 import intoString from '../stringify/sink/string';
-import { TokenizerReturn, TokenType } from '../stringify/tokenizer/abstract';
 import { doubleQuotedStringDefaultFeature } from '../stringify/features/string/double-quoted';
 import { TokenFeatures } from '../stringify/sink/common';
-import { ObjectFeature, ArrayFeature } from '../stringify/features/abstract';
+import { createRootFeature } from '../stringify/features/other/root';
+import { anyWhitespaceFeature } from '../stringify/features/whitespace/any';
+import { createStrictCommaObjectDefaultFeature } from '../stringify/features/object/strict-comma';
+import { createStrictCommaArrayDefaultFeature } from '../stringify/features/array/strict-comma';
+import noMetadataTokenizer from '../stringify/tokenizer/no-metadata';
+import { decimalNumberDefaultFeature } from '../stringify/features/number/decimal';
+import { singleQuotedStringDefaultFeature } from '../stringify/features/string/single-quoted';
+import { nullDefaultFeature } from '../stringify/features/other/null';
+import { booleanDefaultFeature } from '../stringify/features/boolean/boolean';
 
-function* fakeTokenizer(data: any): TokenizerReturn {
-    yield {
-        type: TokenType.Value,
-        value: data,
-    };
-}
-
-function* fakeRootFeature(): Generator<
-    string,
-    undefined,
-    any
-> {
-    while (true) {
-        yield '';
-    }
-}
+const invisibleFeatures = [
+    anyWhitespaceFeature,
+];
 
 const valueFeatures = [
+    nullDefaultFeature,
+    booleanDefaultFeature,
     doubleQuotedStringDefaultFeature,
+    singleQuotedStringDefaultFeature,
+    decimalNumberDefaultFeature,
 ];
-const objectFeatures: ObjectFeature[] = [];
-const arrayFeatures: ArrayFeature[] = [];
+const objectFeatures = [
+    createStrictCommaObjectDefaultFeature(invisibleFeatures),
+];
+const arrayFeatures = [
+    createStrictCommaArrayDefaultFeature(invisibleFeatures),
+];
 
 const features: TokenFeatures = {
     value: valueFeatures,
     object: objectFeatures,
     array: arrayFeatures,
-    root: fakeRootFeature,
+    root: createRootFeature(invisibleFeatures),
 };
 
-const data = 'test string\nwith\tescapes, emoji (\ud83d\udc0e\ud83d\udc71\u2764🏳️‍🌈), unprintables(\uFFFF, \x1f) and others: \uD835\uDC68 Z͑ͫ̓ͪ̂ͫ̽͏̴̙̤̞͉͚̯̞̠͍A̴̵̜̰͔ͫ͗͢L̠ͨͧͩ͘G̴̻͈͍͔̹̑͗̎̅͛́Ǫ̵̹̻̝̳͂̌̌͘';
-
-console.log(util.inspect(data, { colors: true }));
-console.log(intoString(data, fakeTokenizer, features));
+// eslint-disable-next-line import/prefer-default-export
+export function stringifyNoMetadata(data: any): string {
+    return intoString(data, noMetadataTokenizer, features);
+}

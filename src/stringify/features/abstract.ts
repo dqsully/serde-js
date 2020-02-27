@@ -22,12 +22,30 @@ export type ValueFeature = (token: ValueToken) => string | undefined;
 
 export type ObjectFeature = (token: ObjectToken) => Generator<
     string,
-    undefined,
+    string | undefined,
     InvisibleToken | KeyPlaceholderToken | DataPlaceholderToken | ObjectEndToken | SeparatorToken
->;
+> | undefined;
 
 export type ArrayFeature = (token: ArrayToken) => Generator<
     string,
-    undefined,
+    string | undefined,
     InvisibleToken | DataPlaceholderToken | ArrayEndToken | SeparatorToken
->;
+> | undefined;
+
+export function runInvisibles(
+    features: InvisibleFeature[],
+    token: InvisibleToken,
+): string | undefined {
+    let feature;
+    let result;
+
+    for (feature of features) {
+        result = feature(token);
+
+        if (result !== undefined) {
+            return result;
+        }
+    }
+
+    return undefined;
+}

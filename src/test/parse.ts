@@ -1,5 +1,3 @@
-import util from 'util';
-
 import parseString from '../parse/source/string';
 import noMetadata from '../parse/visitor/no-metadata';
 import astMetadata from '../parse/visitor/ast-metadata';
@@ -54,50 +52,6 @@ valueFeatures.push(
     }),
 );
 
-const data = `
-{
-    // line comment
-    "foo" /* in the weird places */ : "bar" /* yup weird */,
-    'foo2': "bar2",
-    "object": {
-        "lol": "it works!!!",
-
-        "bool too": true,
-        "and false": false,
-
-        "null": null,
-
-        "array test": [
-            // comment here
-            'string',
-            # comment there
-            true
-            -- comment everywhere!!!
-        ],
-
-        'numbers': [
-            0,
-            -0,
-            5,
-            -5,
-            60,
-            3.14,
-            -1.693,
-            6.836e5,
-            15E-10,
-            -4e7
-        ]
-    }
-}
-`;
-const noMetadataVisitor = {
-    context: noMetadata.root.initialize(),
-    impl: noMetadata.root,
-};
-const astMetadataVisitor = {
-    context: astMetadata.root.initialize(),
-    impl: astMetadata.root,
-};
 const rootFeatures = [
     new RootFeature({
         whitespace,
@@ -105,10 +59,20 @@ const rootFeatures = [
     }),
 ];
 
-console.log(parseString(data, noMetadataVisitor, rootFeatures, noMetadata));
-console.log();
+export function parseNoMetadata(data: string): any {
+    const noMetadataVisitor = {
+        context: noMetadata.root.initialize(),
+        impl: noMetadata.root,
+    };
 
-const [value, ast] = parseString(data, astMetadataVisitor, rootFeatures, astMetadata);
-console.log(value);
-console.log();
-console.log(util.inspect(ast, { colors: true, depth: 20 }));
+    return parseString(data, noMetadataVisitor, rootFeatures, noMetadata);
+}
+
+export function parseAstMetadata(data: string): any {
+    const astMetadataVisitor = {
+        context: astMetadata.root.initialize(),
+        impl: astMetadata.root,
+    };
+
+    return parseString(data, astMetadataVisitor, rootFeatures, astMetadata);
+}

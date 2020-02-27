@@ -115,6 +115,7 @@ export default class StrictCommaObjectFeature extends AbstractFeature<Settings> 
         }
 
         const value = visitors.object.finalize(objContext);
+        visitor.impl.setMetadata(visitor.context, 'object.type', 'strict-comma');
         visitor.impl.visitValue(visitor.context, value);
 
         return FeatureResult.Commit;

@@ -61,6 +61,7 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
             const number = parseFloat(numberStr);
 
             visitor.impl.visitValue(visitor.context, number);
+            visitor.impl.setMetadata(visitor.context, 'number.type', 'decimal');
         };
 
         let char: string | undefined;

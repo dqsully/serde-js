@@ -31,22 +31,24 @@ interface RootFrame {
 interface ObjectFrame {
     type: FrameType.Object;
 
-    feature: ReturnType<ObjectFeature>,
+    feature: NonNullable<ReturnType<ObjectFeature>>,
     isKey: boolean;
     isSeparator: boolean;
+    foundData: boolean;
 }
 
 interface ArrayFrame {
     type: FrameType.Array;
 
-    feature: ReturnType<ArrayFeature>,
+    feature: NonNullable<ReturnType<ArrayFeature>>,
     isSeparator: boolean;
+    foundData: boolean;
 }
 
 type StackFrame = RootFrame | ObjectFrame | ArrayFrame;
 
 function testResult(
-    result: IteratorResult<string, undefined>,
+    result: IteratorResult<string, string | undefined>,
     message: string,
 ): result is IteratorYieldResult<string> {
     if (result.done) {
@@ -79,7 +81,7 @@ export function* stringifyTokens(
         feature: features.root(),
     };
 
-    let featureResult: IteratorResult<string, undefined>;
+    let featureResult: IteratorResult<string, string | undefined>;
     let tokenResult = tokenStream.next();
     let token;
 
@@ -195,6 +197,7 @@ export function* stringifyTokens(
                         }
 
                         frame.isSeparator = true;
+                        frame.foundData = true;
                         frame.isKey = !frame.isKey;
 
                         if (testResult(
@@ -208,20 +211,26 @@ export function* stringifyTokens(
                     }
 
                     case TokenType.ObjectEnd: {
-                        if (!frame.isSeparator) {
-                            throw new Error(
-                                'Expected a data or invisible token, got an object end token',
-                            );
-                        } else if (!frame.isKey) {
-                            throw new Error(
-                                'Expected a separator or invisible token, got an object end token',
-                            );
+                        if (frame.foundData) {
+                            if (!frame.isSeparator) {
+                                throw new Error(
+                                    'Expected a data or invisible token, got an object end token',
+                                );
+                            } else if (!frame.isKey) {
+                                throw new Error(
+                                    'Expected a separator or invisible token, got an object end token',
+                                );
+                            }
                         }
 
                         featureResult = frame.feature.next(token);
 
                         if (!featureResult.done) {
                             throw new Error('Object feature did not end on an object end token');
+                        }
+
+                        if (featureResult.value !== undefined) {
+                            yield featureResult.value;
                         }
 
                         frame = stack.pop();
@@ -287,6 +296,7 @@ export function* stringifyTokens(
                         // Let the current feature know data is about to be stringified
                         featureResult = frame.feature.next(dataPlaceholderToken);
 
+                        frame.foundData = true;
                         frame.isSeparator = true;
 
                         if (testResult(
@@ -300,16 +310,22 @@ export function* stringifyTokens(
                     }
 
                     case TokenType.ArrayEnd: {
-                        if (!frame.isSeparator) {
-                            throw new Error(
-                                'Expected a data or invisible token, got an array end token',
-                            );
+                        if (frame.foundData) {
+                            if (!frame.isSeparator) {
+                                throw new Error(
+                                    'Expected a data or invisible token, got an array end token',
+                                );
+                            }
                         }
 
                         featureResult = frame.feature.next(token);
 
                         if (!featureResult.done) {
                             throw new Error('Array feature did not end on an array end token');
+                        }
+
+                        if (featureResult.value !== undefined) {
+                            yield featureResult.value;
                         }
 
                         frame = stack.pop();
@@ -363,18 +379,21 @@ export function* stringifyTokens(
                 stack.push(frame);
 
                 let acceptedFeature: ReturnType<ObjectFeature>;
-                let result: IteratorResult<string, undefined> | undefined;
+                let result: IteratorResult<string, string | undefined> | undefined;
 
                 for (const feature of features.object) {
                     acceptedFeature = feature(token);
-                    result = acceptedFeature.next();
 
-                    if (!result.done) {
-                        break;
+                    if (acceptedFeature !== undefined) {
+                        result = acceptedFeature.next();
+
+                        if (!result.done) {
+                            break;
+                        }
                     }
                 }
 
-                if (result === undefined || result.done) {
+                if (acceptedFeature === undefined || result === undefined || result.done) {
                     throw new Error('No object features handled an object token');
                 }
 
@@ -384,9 +403,10 @@ export function* stringifyTokens(
 
                 frame = {
                     type: FrameType.Object,
-                    feature: acceptedFeature!,
+                    feature: acceptedFeature,
                     isKey: true,
                     isSeparator: false,
+                    foundData: false,
                 };
 
                 break;
@@ -396,18 +416,21 @@ export function* stringifyTokens(
                 stack.push(frame);
 
                 let acceptedFeature: ReturnType<ArrayFeature>;
-                let result: IteratorResult<string, undefined> | undefined;
+                let result: IteratorResult<string, string | undefined> | undefined;
 
                 for (const feature of features.array) {
                     acceptedFeature = feature(token);
-                    result = acceptedFeature.next();
 
-                    if (!result.done) {
-                        break;
+                    if (acceptedFeature !== undefined) {
+                        result = acceptedFeature.next();
+
+                        if (!result.done) {
+                            break;
+                        }
                     }
                 }
 
-                if (result === undefined || result.done) {
+                if (acceptedFeature === undefined || result === undefined || result.done) {
                     throw new Error('No array features handled an array token');
                 }
 
@@ -417,8 +440,9 @@ export function* stringifyTokens(
 
                 frame = {
                     type: FrameType.Array,
-                    feature: acceptedFeature!,
+                    feature: acceptedFeature,
                     isSeparator: false,
+                    foundData: false,
                 };
 
                 break;

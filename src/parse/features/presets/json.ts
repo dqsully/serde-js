@@ -40,11 +40,11 @@ valueFeatures.push(
     }),
 );
 
-const jsonPreset = [
+const jsonParsePreset = [
     new RootFeature({
         whitespace,
         rootFeatures: valueFeatures,
     }),
 ];
 
-export default jsonPreset;
+export default jsonParsePreset;

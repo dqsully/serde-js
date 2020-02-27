@@ -44,11 +44,11 @@ valueFeatures.push(
     }),
 );
 
-const jsonPreset = [
+const jsonCParsePreset = [
     new RootFeature({
         whitespace,
         rootFeatures: valueFeatures,
     }),
 ];
 
-export default jsonPreset;
+export default jsonCParsePreset;
