@@ -4,15 +4,9 @@ import {
     AbstractArrayVisitor,
     Visitors,
     AbstractObjectKeyVisitor,
-    MetadataValue,
 } from './abstract';
 import { VisitorContext } from './context';
-
-interface MetadataRecord {
-    kind: string,
-    value: MetadataValue;
-}
-type MetadataMap = {[kind: string]: MetadataValue};
+import { MetadataValue, MetadataRecord, MetadataMap } from '../../types/metadata';
 
 export interface AstBaseNode {
     metaBefore?: MetadataRecord[];

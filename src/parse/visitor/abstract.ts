@@ -1,6 +1,5 @@
 import { VisitorContext } from './context';
-
-export type MetadataValue = boolean | number | string;
+import { MetadataValue } from '../../types/metadata';
 
 export interface AbstractVisitor<C extends VisitorContext> {
     _C: C;

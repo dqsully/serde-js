@@ -1,3 +1,5 @@
+import isPrintable from './printable';
+
 function isHex(char: string) {
     return /[0-9a-fA-F]/.test(char);
 }
@@ -127,26 +129,76 @@ export function* unescape() {
         }
     }
 }
-// export function parseEscape(escape: string) {
-//     switch (escape) {
-//         case 'b':
-//             return '\b';
-//         case 'f':
-//             return '\f';
-//         case 'n':
-//             return '\n';
-//         case 'r':
-//             return '\r';
-//         case 't':
-//             return '\t';
-//         case 'v':
-//             return '\v';
-//         case '0':
-//             return '\0';
-//         default:
-//     }
 
-//     if (/x[0-9a-fA-F]{2}/)
+function padHex(n: number, len: number) {
+    return n.toString(16).padStart(len, '0');
+}
 
-//     throw new Error(`Unknown escape sequence: '\\${escape}'`);
-// }
+// Heavily inspired by rust's char::escape_debug_ext(self, false)
+export function escape(string: string, quote?: string) {
+    let output = '';
+    let lastIndex = 0;
+
+    let i = 0;
+    let char;
+    let codepoint;
+
+    for (char of string) {
+        if (char === '\t') {
+            output += string.slice(lastIndex, i);
+            output += '\\t';
+            lastIndex = i + 1;
+        } else if (char === '\r') {
+            output += string.slice(lastIndex, i);
+            output += '\\r';
+            lastIndex = i + 1;
+        } else if (char === '\n') {
+            output += string.slice(lastIndex, i);
+            output += '\\n';
+            lastIndex = i + 1;
+        } else if (char === '\\') {
+            output += string.slice(lastIndex, i);
+            output += '\\\\';
+            lastIndex = i + 1;
+        } else if (char === quote) {
+            output += string.slice(lastIndex, i);
+            output += `\\${quote}`;
+            lastIndex = i + 1;
+        } else {
+            codepoint = char.codePointAt(0)!;
+
+            if (!isPrintable(codepoint)) {
+                output += string.slice(lastIndex, i);
+
+                if (codepoint <= 0xff) {
+                    output += `\\x${padHex(codepoint, 2)}`;
+                } else {
+                    if (codepoint > 0xffff) {
+                        // eslint-disable-next-line no-bitwise
+                        output += `\\u${padHex(codepoint >> 16, 4)}`;
+                    }
+
+                    // eslint-disable-next-line no-bitwise
+                    output += `\\u${padHex(codepoint & 0xffff, 4)}`;
+                }
+
+                // Unicode codee points can be multiple "chars";
+                lastIndex = i + char.length;
+            }
+        }
+
+        // Unicode code points can be multiple "chars"
+        i += char.length;
+    }
+
+    // Fast case
+    if (lastIndex === 0) {
+        return string;
+    }
+
+    if (lastIndex !== i) {
+        output += string.slice(lastIndex, i);
+    }
+
+    return output;
+}
