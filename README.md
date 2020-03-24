@@ -148,7 +148,11 @@ This one isn't as pretty, but it's Input -> (Stringifier Engine -> Tokenizer) ->
         * [X] Visitor
         * [ ] Tokenizer
 
-    * [ ] Store metadata in output objects and arrays
+    * [ ] Combined AST with data and metadata
+        * [X] Visitor
+        * [ ] Tokenizer
+
+    * [ ] Store metadata "invisibly" in output objects and arrays
         * [ ] Visitor
         * [ ] Tokenizer
 
@@ -162,6 +166,8 @@ This one isn't as pretty, but it's Input -> (Stringifier Engine -> Tokenizer) ->
 
 * Other features
     * [X] Full unicode support (thanks Rust for the inspiration!)
+    * [X] Parser error messages with location data
+    * [ ] Stringifier error messages with a data "stack trace"
     * [ ] Tests
         * [ ] Features
         * [ ] Sources

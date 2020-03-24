@@ -22,7 +22,7 @@ export interface AbstractObjectVisitor<
     PC extends VisitorContext,
 > extends AbstractVisitor<C> {
     initialize(parent: PC): C;
-    finalize(context: C): object;
+    finalize(context: C): any;
 
     seedKey(context: C): Visitor<AbstractObjectKeyVisitor<any>>;
 }
@@ -39,7 +39,7 @@ export interface AbstractArrayVisitor<
     PC extends VisitorContext,
 > extends AbstractVisitor<C> {
     initialize(parent: PC): C;
-    finalize(context: C): any[];
+    finalize(context: C): any;
 
     markNextValue(context: C): void;
 }

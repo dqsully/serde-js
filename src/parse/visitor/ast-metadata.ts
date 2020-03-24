@@ -164,11 +164,12 @@ const AstMetadataObjectVisitor: AstMetadataObjectVisitor = {
 
         if (!VisitorContext.isEmpty(context) && context.key !== undefined) {
             // Record metadata for previous value
+
             if (context.node.childMeta === undefined) {
                 context.node.childMeta = new Map();
             }
 
-            context.node.childMeta.set(context.key!, {
+            context.node.childMeta.set(context.key, {
                 key: context.tmpKeyNode,
                 value: context.tmpNode,
             });
@@ -321,7 +322,6 @@ const AstMetadataArrayVisitor: AstMetadataArrayVisitor = {
             }
 
             context.node.childMeta.push(context.tmpNode);
-            context.tmpNode = {};
         }
 
         if (context.tmpNode.metaBefore !== undefined) {

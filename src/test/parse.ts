@@ -1,6 +1,7 @@
 import parseString from '../parse/source/string';
 import noMetadata from '../parse/visitor/no-metadata';
 import astMetadata from '../parse/visitor/ast-metadata';
+import wrappedMetadata, { WrappedAny } from '../parse/visitor/wrapped-metadata';
 import BooleanFeature from '../parse/features/boolean/boolean';
 import DoubleSlashCommentFeature from '../parse/features/comment/double-slash';
 import DoubleDashCommentFeature from '../parse/features/comment/double-dash';
@@ -15,6 +16,7 @@ import { AbstractFeature } from '../parse/features/abstract';
 import NullFeature from '../parse/features/other/null';
 import StrictCommaArrayFeature from '../parse/features/array/strict-comma';
 import DecimalNumberFeature from '../parse/features/number/decimal';
+
 
 const whitespace: AbstractFeature[] = [
     new AnyWhitespaceFeature(),
@@ -75,4 +77,13 @@ export function parseAstMetadata(data: string): any {
     };
 
     return parseString(data, astMetadataVisitor, rootFeatures, astMetadata);
+}
+
+export function parseWrappedMetadata(data: string): WrappedAny {
+    const wrappedMetadataVisitor = {
+        context: wrappedMetadata.root.initialize(),
+        impl: wrappedMetadata.root,
+    };
+
+    return parseString(data, wrappedMetadataVisitor, rootFeatures, wrappedMetadata);
 }

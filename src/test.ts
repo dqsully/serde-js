@@ -2,7 +2,7 @@ import 'source-map-support/register';
 
 import util from 'util';
 
-import { parseAstMetadata, parseNoMetadata } from './test/parse';
+import { parseAstMetadata, parseNoMetadata, parseWrappedMetadata } from './test/parse';
 import { stringifyNoMetadata } from './test/stringify';
 
 const stringWithEverything = `
@@ -50,13 +50,20 @@ const parsedAstMetadata = parseAstMetadata(stringWithEverything);
 console.log('Parsed with metadata: ', parsedAstMetadata[0]);
 console.log('Metadata: ', util.inspect(parsedAstMetadata[1], { colors: true, depth: 20 }));
 
+const parsedWrappedMetadata = parseWrappedMetadata(stringWithEverything);
+console.log('Parsed and wrapped: ', util.inspect(parsedWrappedMetadata, { colors: true, depth: 40 }));
+
 console.log('Testing parsing without invisibles');
 parseNoMetadata(stringWithNoInvisibles);
 console.log('passed');
 
 const parsedAstBlankMetadata = parseAstMetadata(stringWithNoInvisibles);
 console.log('Parsed with metadata, but has no invisibles: ', parsedAstBlankMetadata[0]);
-console.log('Metadata: ', util.inspect(parsedAstMetadata[1], { colors: true, depth: 20 }));
+console.log('Metadata: ', util.inspect(parsedAstBlankMetadata[1], { colors: true, depth: 20 }));
+
+const parsedWrappedBlankMetadata = parseWrappedMetadata(stringWithNoInvisibles);
+console.log('Parsed and wrapped, but has no invisibles: ', util.inspect(parsedWrappedBlankMetadata, { colors: true, depth: 40 }));
+
 
 const stringifiedWithoutMetadata = stringifyNoMetadata(parsedAstBlankMetadata[0]);
 
