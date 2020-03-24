@@ -5,7 +5,6 @@ function isHex(char: string) {
     return /[0-9a-fA-F]/.test(char);
 }
 
-// eslint-disable-next-line import/prefer-default-export
 export function* unescape() {
     let output = '';
 
@@ -183,7 +182,7 @@ export function escape(string: string, quote?: string) {
                     output += `\\u${padHex(codepoint & 0xffff, 4)}`;
                 }
 
-                // Unicode codee points can be multiple "chars";
+                // Unicode code points can be multiple "chars";
                 lastIndex = i + char.length;
             }
         }
