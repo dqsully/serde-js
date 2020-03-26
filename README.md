@@ -39,7 +39,7 @@ The character iterator (`parseStringsWithParser`) will buffer all characters unt
 
 The feature processor (`parseChars`) is what actually runs the different features on a stack, and it's probably most-complicated code in this project. Every stack frame is a list of features, and the processor will try every one until one succeeds, rewinding the character iterator on every retry, or until all of them fail.
 
-On top of the feature processor run the features themselves, which must be setup ahead-of-time. Each feature will parse a different part of the language, and if a feature succeds, it will "visit" the data with the configured visitor and "commit" the processed characters. If it fails, it will return a deferred error message explaining why it failed.
+On top of the feature processor run the features themselves, which must be setup ahead-of-time. Each feature will parse a different part of the language, and if a feature succeeds, it will "visit" the data with the configured visitor and "commit" the processed characters. If it fails, it will return a deferred error message explaining why it failed.
 
 And the last part is the visitor, whose job it is to consume the parsed data into a certain format. Different visitors produce different formats for different capabilities. The `NoMetadataVisitor`, for example, ignores all metadata and returns only the real data.
 
