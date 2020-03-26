@@ -5,7 +5,7 @@ export function hashCommentDefaultFeature(token: InvisibleToken) {
         return undefined;
     }
 
-    return `#${token.data}`;
+    return `#${token.data}\n`;
 }
 
 export function hashCommentFeature(token: InvisibleToken) {

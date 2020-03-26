@@ -20,9 +20,15 @@ export interface WrappedValue extends WrappedBaseMetadata {
     contents: ParsedValue;
 }
 
-export interface WrappedAny extends WrappedBaseMetadata {
-    contents: ParsedValue | ParsedObject | ParsedArray;
+export interface WrappedObject extends WrappedBaseMetadata {
+    contents: ParsedObject;
 }
+
+export interface WrappedArray extends WrappedBaseMetadata {
+    contents: ParsedArray;
+}
+
+export type WrappedAny = WrappedValue | WrappedObject | WrappedArray;
 
 interface MarkedWrapped {
     [isWrapped]: true;
@@ -42,14 +48,14 @@ export interface ParsedObjectEntry {
 export interface ParsedObject {
     type: 'object';
 
-    children?: Map<string, ParsedObjectEntry>;
+    children: Map<string, ParsedObjectEntry>;
     metaTail?: MetadataRecord[];
 }
 
 export interface ParsedArray {
     type: 'array';
 
-    children?: WrappedAny[];
+    children: WrappedAny[];
     metaTail?: MetadataRecord[];
 }
 
@@ -153,6 +159,7 @@ const WrappedMetadataObjectVisitor: WrappedMetadataObjectVisitor = {
             value: {
                 [isWrapped]: true,
                 type: 'object',
+                children: new Map(),
             },
 
             tmpKeyMeta: {},
@@ -196,10 +203,6 @@ const WrappedMetadataObjectVisitor: WrappedMetadataObjectVisitor = {
         if (!VisitorContext.isEmpty(context) && context.tmpKey !== undefined) {
             // Record metadata for previous value
 
-            if (context.value.children === undefined) {
-                context.value.children = new Map();
-            }
-
             const key = context.tmpKeyMeta as WrappedValue;
             const value = context.tmpMeta as WrappedAny;
 
@@ -230,10 +233,6 @@ const WrappedMetadataObjectVisitor: WrappedMetadataObjectVisitor = {
 
         if (!VisitorContext.isEmpty(context)) {
             // Record metadata for previous value
-
-            if (context.value.children === undefined) {
-                context.value.children = new Map();
-            }
 
             const key = context.tmpKeyMeta as WrappedValue;
             const value = context.tmpMeta as WrappedAny;
@@ -320,6 +319,7 @@ const WrappedMetadataArrayVisitor: WrappedMetadataArrayVisitor = {
             value: {
                 [isWrapped]: true,
                 type: 'array',
+                children: [],
             },
 
             tmpMeta: {},
@@ -358,10 +358,6 @@ const WrappedMetadataArrayVisitor: WrappedMetadataArrayVisitor = {
         if (VisitorContext.hasLock(context) && !VisitorContext.isEmpty(context)) {
             VisitorContext.releaseLock(context, 'Unreachable');
 
-            if (context.value.children === undefined) {
-                context.value.children = [];
-            }
-
             const value = context.tmpMeta as WrappedAny;
             value.contents = context.tmp!;
 
@@ -390,10 +386,6 @@ const WrappedMetadataArrayVisitor: WrappedMetadataArrayVisitor = {
 
     markNextValue(context: ArrayContext) {
         VisitorContext.releaseLock(context, 'Next value has already been marked');
-
-        if (context.value.children === undefined) {
-            context.value.children = [];
-        }
 
         const value = context.tmpMeta as WrappedAny;
         value.contents = context.tmp!;

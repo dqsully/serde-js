@@ -5,7 +5,7 @@ export function doubleSlashCommentDefaultFeature(token: InvisibleToken) {
         return undefined;
     }
 
-    return `//${token.data}`;
+    return `//${token.data}\n`;
 }
 
 export function doubleSlashCommentFeature(token: InvisibleToken) {

@@ -64,12 +64,10 @@ export default function* noMetadataTokenizer(data: any): TokenizerReturn {
             type: TokenType.Value,
             value: data,
         };
-
-        return;
     }
 
 
-    while (true) {
+    while (frame !== undefined) {
         if (frame.isArray) {
             if (frame.index >= frame.data.length) {
                 // We've reached the end of the array, signal the end and pop
@@ -82,10 +80,6 @@ export default function* noMetadataTokenizer(data: any): TokenizerReturn {
                 };
 
                 frame = stack.pop();
-
-                if (frame === undefined) {
-                    break;
-                }
             } else {
                 if (frame.index > 0) {
                     // console.debug('array separator');
@@ -151,10 +145,6 @@ export default function* noMetadataTokenizer(data: any): TokenizerReturn {
                 };
 
                 frame = stack.pop();
-
-                if (frame === undefined) {
-                    break;
-                }
             } else {
                 if (frame.index > 0) {
                     // console.debug('object separator');

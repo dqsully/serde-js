@@ -5,7 +5,7 @@ export function doubleDashCommentDefaultFeature(token: InvisibleToken) {
         return undefined;
     }
 
-    return `--${token.data}`;
+    return `--${token.data}\n`;
 }
 
 export function doubleDashCommentFeature(token: InvisibleToken) {

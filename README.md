@@ -148,9 +148,9 @@ This one isn't as pretty, but it's Input -> (Stringifier Engine -> Tokenizer) ->
         * [X] Visitor
         * [ ] Tokenizer
 
-    * [ ] Combined AST with data and metadata
+    * [X] Combined AST with data and metadata
         * [X] Visitor
-        * [ ] Tokenizer
+        * [X] Tokenizer
 
     * [ ] Store metadata "invisibly" in output objects and arrays
         * [ ] Visitor
