@@ -2,7 +2,7 @@ import { anyWhitespaceFeature } from '../whitespace/any';
 import { nullDefaultFeature } from '../other/null';
 import { booleanDefaultFeature } from '../boolean/boolean';
 import { doubleQuotedStringDefaultFeature } from '../string/double-quoted';
-import { singleQuotedStringDefaultFeature } from '../string/single-quoted';
+import { singleQuotedStringFeature } from '../string/single-quoted';
 import { decimalNumberDefaultFeature } from '../number/decimal';
 import { createStrictCommaObjectDefaultFeature } from '../object/strict-comma';
 import { createStrictCommaArrayDefaultFeature } from '../array/strict-comma';
@@ -20,8 +20,8 @@ const invisibleFeatures = [
 const valueFeatures = [
     nullDefaultFeature,
     booleanDefaultFeature,
+    singleQuotedStringFeature,
     doubleQuotedStringDefaultFeature,
-    singleQuotedStringDefaultFeature,
     decimalNumberDefaultFeature,
 ];
 const objectFeatures = [

@@ -54,7 +54,7 @@ A tokenizer is basically the reverse of a visitor from the parser land - it take
 
 A stringifier feature either creates a string from a single token, or a stream of strings from a stream of tokens. This depends on what the feature is meant for. Array features, for example, will handle multiple tokens, and are in charge of outputting the start and end the array, and any separators between values. If a feature can't process the initial token, it should return undefined immediately.
 
-This one isn't as pretty, but it's Input -> (Stringifier Engine -> Tokenizer) -> Features -> Sink, kinda.
+This one isn't as pretty, but it's Input -> (Stringifier Engine <-> Tokenizer) -> Features -> Sink, more or less.
 
 ## Feature progress
 * Parsable languages
@@ -99,22 +99,22 @@ This one isn't as pretty, but it's Input -> (Stringifier Engine -> Tokenizer) ->
         * [ ] Single-line whitespace
 
 * Stringifiable languages
-    * [ ] JSON
+    * [X] JSON
         * [X] Null
         * [X] Boolean
         * [X] Double-quoted string
         * [X] Decimal number
         * [X] Strict-comma object
         * [X] Strict-comma array
-        * [ ] Any whitespace (untested)
+        * [X] Any whitespace
 
-    * [ ] JSONC
-        * [ ] JSON (untested whitespace)
-        * [ ] Double-slash comments (untested)
-        * [ ] Slash-star comments (untested)
+    * [X] JSONC
+        * [X] JSON (untested whitespace)
+        * [X] Double-slash comments
+        * [X] Slash-star comments
 
     * [ ] JSON5
-        * [ ] JSON (minus object, array, and number) (untested)
+        * [X] JSON (minus object, array, and number)
         * [ ] ECMAScript IdentifierName
         * [ ] Lax-comma object
         * [ ] Lax-comma array
@@ -123,20 +123,20 @@ This one isn't as pretty, but it's Input -> (Stringifier Engine -> Tokenizer) ->
         * [ ] Lax decimal number (start/end with ., start with +)
         * [ ] Infinity
         * [ ] NaN
-        * [ ] Double-slash comment (untested)
-        * [ ] Slash-star comment (untested)
+        * [X] Double-slash comment
+        * [X] Slash-star comment
 
     * [ ] Hjson
-        * [ ] JSON (minus object and array) (untested)
+        * [X] JSON (minus object and array)
         * [ ] Optional-comma object
         * [ ] Quoteless key string
         * [ ] Optional-comma array
         * [X] Single-quoted string
         * [ ] Quoteless string
         * [ ] Multiline string
-        * [ ] Double-slash comment (untested)
-        * [ ] Slash-star comment (untested)
-        * [ ] Hash comment (untested)
+        * [X] Double-slash comment
+        * [X] Slash-star comment
+        * [X] Hash comment
         * [ ] Single-line whitespace
 
 * In-memory formats
