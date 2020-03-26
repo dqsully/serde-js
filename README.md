@@ -1,7 +1,7 @@
 # SerDe JS (unofficial title)
 This is a work-in-progress project to build a single JSON/JSON5/Hjson parser to rule them all. The core idea of this library is to be able to compose parsers out of individual language features (like `BooleanFeature`, `DoubleSlashCommentFeature`, etc.) and a "visitor" implementation that creates real data from the language feature parsers. These "visitors" will also be able to store metadata in the output, so that data can be stringified back into its (mostly) original formatting. This is the same concept as "round-trip parsing" in Hjson.
 
-My goal for this project is primarily flexibility, and not speed. This is not mean't to be the fastest parser in the world, although I try to take efficiency very seriously.
+My goal for this project is primarily flexibility, and not speed. This is not meant to be the fastest parser in the world, although I try to take efficiency very seriously.
 
 ## Playing around with it
 To get started with this project, first make sure you have Node.js and NPM installed, and then clone down this repository and install the NPM dependencies:
