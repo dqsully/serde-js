@@ -48,7 +48,7 @@ So to recap, Source -> Character Iterator -> Feature Processor -> Features -> Vi
 ### Stringifier architecture
 Like the parser, the stringifier starts with a sink - something that will drive the stringifier engine and consume its string chunks. However, the rest of the system is effectively reversed. Sinks are still allowed to be asynchronous though, so strings and streams as sinks will be supported.
 
-The stringifier engine ([src/stringify/source/common.ts](./src/stringify/source/common.ts)) also does quite a bit of work, reading tokens from a tokenizer, validating them, and calling the proper features with these tokens. It's also up there for some of the most complicated code in this project
+The stringifier engine ([src/stringify/source/common.ts](./src/stringify/source/common.ts)) also does quite a bit of work, reading tokens from a tokenizer, validating them, and calling the proper features with these tokens. It's also up there for some of the most complicated code in this project.
 
 A tokenizer is basically the reverse of a visitor from the parser land - it takes in data of a certain format and creates a stream of tokens from it. These tokens may include "invisibles," which are things like whitespace and comments.
 
