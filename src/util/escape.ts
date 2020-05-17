@@ -1,9 +1,6 @@
 import isUnprintable from './printable';
 import isGraphemeExtend from './grapheme-extend';
-
-function isHex(char: string) {
-    return /[0-9a-fA-F]/.test(char);
-}
+import isHexChar from './is-hex';
 
 export function* unescape() {
     let output = '';
@@ -56,7 +53,7 @@ export function* unescape() {
                         if (char === undefined) {
                             throw new Error('Unfinished hexadecimal escape sequence');
                         }
-                        if (!isHex(char)) {
+                        if (!isHexChar(char)) {
                             throw new Error(`Unexpected '${char}' in hexadecimal escape sequence`);
                         }
 
@@ -67,7 +64,7 @@ export function* unescape() {
                         if (char === undefined) {
                             throw new Error('Unfinished hexadecimal escape sequence');
                         }
-                        if (!isHex(char)) {
+                        if (!isHexChar(char)) {
                             throw new Error(`Unexpected '${char}' in hexadecimal escape sequence`);
                         }
 
@@ -88,7 +85,7 @@ export function* unescape() {
                                 if (char === undefined) {
                                     throw new Error('Unfinished unicode escape sequence');
                                 }
-                                if (!isHex(char)) {
+                                if (!isHexChar(char)) {
                                     throw new Error(`Unexpected '${char}' in unicode escape sequence`);
                                 }
 
@@ -97,7 +94,7 @@ export function* unescape() {
 
                             output += String.fromCodePoint(parseInt(scratch, 16));
                         } else {
-                            if (!isHex(char)) {
+                            if (!isHexChar(char)) {
                                 throw new Error(`Unexpected '${char}' in unicode escape sequence`);
                             }
 
@@ -109,9 +106,11 @@ export function* unescape() {
                                 if (char === undefined) {
                                     throw new Error('Unfinished unicode escape sequence');
                                 }
-                                if (!isHex(char)) {
+                                if (!isHexChar(char)) {
                                     throw new Error(`Unexpected '${char}' in unicode escape sequence`);
                                 }
+
+                                scratch += char;
                             }
 
                             output += String.fromCharCode(parseInt(scratch, 16));

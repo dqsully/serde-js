@@ -46,6 +46,90 @@ function* getGraphemeExtendRanges(rawTable) {
     }
 }
 
+function* getIdStartRanges(rawTable) {
+    let line;
+    let hashIndex;
+
+    let codeRange;
+    let property;
+    let codeStart;
+    let codeEnd;
+
+    const lines = rawTable.split('\n');
+
+    for (line of lines) {
+        hashIndex = line.indexOf('#');
+
+        if (hashIndex !== -1) {
+            line = line.slice(0, hashIndex);
+        }
+
+        if (line.length === 0) {
+            // eslint-disable-next-line no-continue
+            continue;
+        }
+
+        ([codeRange, property] = line.split(';').map((s) => s.trim()));
+
+        if (property.trim() !== 'ID_Start') {
+            // eslint-disable-next-line no-continue
+            continue;
+        }
+
+        if (codeRange.includes('..')) {
+            ([codeStart, codeEnd] = codeRange.split('..').map((s) => parseInt(s, 16)));
+
+            yield [codeStart, codeEnd + 1];
+        } else {
+            codeStart = parseInt(codeRange, 16);
+
+            yield [codeStart, codeStart + 1];
+        }
+    }
+}
+
+function* getIdContinueRanges(rawTable) {
+    let line;
+    let hashIndex;
+
+    let codeRange;
+    let property;
+    let codeStart;
+    let codeEnd;
+
+    const lines = rawTable.split('\n');
+
+    for (line of lines) {
+        hashIndex = line.indexOf('#');
+
+        if (hashIndex !== -1) {
+            line = line.slice(0, hashIndex);
+        }
+
+        if (line.length === 0) {
+            // eslint-disable-next-line no-continue
+            continue;
+        }
+
+        ([codeRange, property] = line.split(';').map((s) => s.trim()));
+
+        if (property.trim() !== 'ID_Continue') {
+            // eslint-disable-next-line no-continue
+            continue;
+        }
+
+        if (codeRange.includes('..')) {
+            ([codeStart, codeEnd] = codeRange.split('..').map((s) => parseInt(s, 16)));
+
+            yield [codeStart, codeEnd + 1];
+        } else {
+            codeStart = parseInt(codeRange, 16);
+
+            yield [codeStart, codeStart + 1];
+        }
+    }
+}
+
 (async () => {
     console.log('Donwloading table...');
 
@@ -55,7 +139,24 @@ function* getGraphemeExtendRanges(rawTable) {
 
     console.log('    done');
 
-    const rangeIter = getGraphemeExtendRanges(rawTable);
+    generateCheckScript(
+        getGraphemeExtendRanges(rawTable),
+        'isGraphemeExtend',
+        '../src/util/grapheme-extend.ts',
+        'gen/generate-derived-props.js',
+    );
 
-    generateCheckScript(rangeIter, 'isGraphemeExtend', '../src/util/grapheme-extend.ts', 'gen/generate-derived-props.js');
+    generateCheckScript(
+        getIdStartRanges(rawTable),
+        'isIdStart',
+        '../src/util/id-start.ts',
+        'gen/generate-derived-props.js',
+    );
+
+    generateCheckScript(
+        getIdContinueRanges(rawTable),
+        'isIdContinue',
+        '../src/util/id-continue.ts',
+        'gen/generate-derived-props.js',
+    );
 })().catch(console.error);
