@@ -1,5 +1,7 @@
-import { Visitor } from '../../visitor/abstract';
-import { AbstractFeature, AbstractFeatureParseReturn, FeatureResult } from '../abstract';
+import { Visitor, Visitors } from '../../visitor/abstract';
+import {
+    AbstractFeature, AbstractFeatureParseReturn, FeatureResult, PeekAhead,
+} from '../abstract';
 
 const trueChars = 'true'.split('');
 const falseChars = 'false'.split('');
@@ -13,7 +15,13 @@ export default class BooleanFeature extends AbstractFeature<Settings> {
     public settings: Settings = {};
 
     // We don't use `this` because there are no settings for `BooleanFeature`
-    public* parse(firstChar: string, visitor: Visitor): AbstractFeatureParseReturn {
+    public* parse(
+        firstChar: string,
+        visitor: Visitor,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        _visitors: Visitors,
+        peekFinalizers?: PeekAhead,
+    ): AbstractFeatureParseReturn {
         let variant: string[];
 
         if (firstChar === 't') {
@@ -38,12 +46,17 @@ export default class BooleanFeature extends AbstractFeature<Settings> {
             }
         }
 
-        // TODO: yield to defer visiting, allowing another feature to test the
-        // chain
+        if (peekFinalizers !== undefined) {
+            yield peekFinalizers;
+        }
 
         visitor.impl.visitValue(visitor.context, variant === trueChars);
 
         // Commit all parsed chars
+        if (peekFinalizers !== undefined) {
+            return FeatureResult.CommitUntilLast;
+        }
+
         return FeatureResult.Commit;
     }
 }

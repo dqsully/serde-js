@@ -29,6 +29,10 @@ export default class IdentifierNameStringFeature extends AbstractFeature<Setting
         let first = true;
 
         while (true) {
+            if (char === undefined) {
+                break;
+            }
+
             if (char === '\\') {
                 char = yield;
                 if (char !== 'u') {
@@ -52,7 +56,7 @@ export default class IdentifierNameStringFeature extends AbstractFeature<Setting
                             break;
                         }
                         if (!isHexChar(char)) {
-                            return () => `expected '${char}' to be a hexadecimal digit for a unicode escape`;
+                            return () => `expected '${char}' to be a hexadecimal digit (0-9, a-f) for a unicode escape`;
                         }
 
                         numText += char;
@@ -77,7 +81,7 @@ export default class IdentifierNameStringFeature extends AbstractFeature<Setting
                             return () => 'unexpected end of file in unicode escape';
                         }
                         if (!isHexChar(char)) {
-                            return () => `expected '${char}' to be a hexadecimal digit`;
+                            return () => `expected '${char}' to be a hexadecimal digit (0-9, a-f)`;
                         }
 
                         numText += char;
@@ -85,7 +89,7 @@ export default class IdentifierNameStringFeature extends AbstractFeature<Setting
 
                     num = Number.parseInt(numText, 16);
                 } else {
-                    return () => `expected '${char}' to be '{' or a hexadecimal digit for a unicode escape`;
+                    return () => `expected '${char}' to be '{' or a hexadecimal digit (0-9, a-f) for a unicode escape`;
                 }
 
                 if (first) {
@@ -128,14 +132,14 @@ export default class IdentifierNameStringFeature extends AbstractFeature<Setting
             first = false;
         }
 
-        if (peekFinalizers !== undefined) {
+        if (char !== undefined && peekFinalizers !== undefined) {
             yield peekFinalizers;
         }
 
         visitor.impl.visitValue(visitor.context, output);
         visitor.impl.setMetadata(visitor.context, 'string.type', 'identifier-name');
 
-        if (peekFinalizers !== undefined) {
+        if (char !== undefined && peekFinalizers !== undefined) {
             return FeatureResult.CommitUntilLast;
         }
 
