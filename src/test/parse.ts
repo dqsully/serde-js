@@ -31,7 +31,7 @@ const valueFeatures: AbstractFeature[] = [
     new BooleanFeature(),
     new DoubleQuotedStringFeature(),
     new SingleQuotedStringFeature(),
-    new DecimalNumberFeature(),
+    new DecimalNumberFeature({}),
     // StrictCommaObjectFeature (placeholder)
     // StrictCommaArrayFeature (placeholder)
 ];

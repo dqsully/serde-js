@@ -20,7 +20,7 @@ const valueFeatures: AbstractFeature[] = [
     new NullFeature(),
     new BooleanFeature(),
     new DoubleQuotedStringFeature(),
-    new DecimalNumberFeature(),
+    new DecimalNumberFeature({}),
     // StrictCommaObjectFeature (placeholder)
     // StrictCommaArrayFeature (placeholder)
 ];

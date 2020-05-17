@@ -35,14 +35,22 @@ export default class IdentifierNameStringFeature extends AbstractFeature<Setting
 
             if (char === '\\') {
                 char = yield;
+
+                if (char === undefined) {
+                    return () => 'unexpected end of file';
+                }
                 if (char !== 'u') {
                     return () => `expected '${char}' to be 'u' for a unicode escape`;
                 }
 
                 let num;
-                let numText;
+                let numText: string;
 
                 char = yield;
+
+                if (char === undefined) {
+                    return () => 'unexpected end of file';
+                }
                 if (char === '{') {
                     numText = '';
 
@@ -50,7 +58,7 @@ export default class IdentifierNameStringFeature extends AbstractFeature<Setting
                         char = yield;
 
                         if (char === undefined) {
-                            return () => 'unexpected end of file in unicode escape';
+                            return () => 'unexpected end of file';
                         }
                         if (char === '}') {
                             break;
@@ -78,7 +86,7 @@ export default class IdentifierNameStringFeature extends AbstractFeature<Setting
                         char = yield;
 
                         if (char === undefined) {
-                            return () => 'unexpected end of file in unicode escape';
+                            return () => 'unexpected end of file';
                         }
                         if (!isHexChar(char)) {
                             return () => `expected '${char}' to be a hexadecimal digit (0-9, a-f)`;
@@ -106,7 +114,7 @@ export default class IdentifierNameStringFeature extends AbstractFeature<Setting
             } else if (char === '$' || char === '_') {
                 output += char;
             } else {
-                const codepoint = char.codePointAt(0);
+                const codepoint = char.codePointAt(0)!;
 
                 if (first && isIdStart(codepoint)) {
                     output += char;
