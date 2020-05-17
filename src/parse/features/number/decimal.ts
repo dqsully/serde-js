@@ -93,10 +93,13 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
             } else if (wholeIsZero) {
                 if (peekFinalizers !== undefined) {
                     yield peekFinalizers;
+
+                    finalizeAndVisit();
+                    return FeatureResult.CommitUntilLast;
                 }
 
                 finalizeAndVisit();
-                return FeatureResult.CommitUntilLast;
+                return FeatureResult.Commit;
             } else if (anyDigit.test(char)) {
                 if (!foundWholeDigit && char === '0') {
                     wholeIsZero = true;
@@ -108,10 +111,13 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
             } else {
                 if (peekFinalizers !== undefined) {
                     yield peekFinalizers;
+
+                    finalizeAndVisit();
+                    return FeatureResult.CommitUntilLast;
                 }
 
                 finalizeAndVisit();
-                return FeatureResult.CommitUntilLast;
+                return FeatureResult.Commit;
             }
         }
 
@@ -138,10 +144,13 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
             } else {
                 if (peekFinalizers !== undefined) {
                     yield peekFinalizers;
+
+                    finalizeAndVisit();
+                    return FeatureResult.CommitUntilLast;
                 }
 
                 finalizeAndVisit();
-                return FeatureResult.CommitUntilLast;
+                return FeatureResult.Commit;
             }
         }
 
@@ -172,10 +181,13 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
             } else {
                 if (peekFinalizers !== undefined) {
                     yield peekFinalizers;
+
+                    finalizeAndVisit();
+                    return FeatureResult.CommitUntilLast;
                 }
 
                 finalizeAndVisit();
-                return FeatureResult.CommitUntilLast;
+                return FeatureResult.Commit;
             }
         }
 
