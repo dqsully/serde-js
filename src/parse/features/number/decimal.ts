@@ -6,7 +6,9 @@ import {
     PeekAhead,
 } from '../abstract';
 
-interface Settings {}
+interface Settings {
+    canStartWithPlus?: boolean;
+}
 export {
     Settings as DecimalNumberFeatureSettings,
 };
@@ -22,10 +24,14 @@ enum NumberState {
 }
 
 export default class DecimalNumberFeature extends AbstractFeature<Settings> {
-    public settings: Settings = {};
+    public settings: Settings;
 
-    // We don't use `this` because there are no settings for `DecimalNumberFeature`
-    // eslint-disable-next-line class-methods-use-this
+    constructor(settings: Settings) {
+        super();
+
+        this.settings = settings;
+    }
+
     public* parse(
         firstChar: string,
         visitor: Visitor,
@@ -42,7 +48,9 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
         let foundExponentDigit = false;
         let state = NumberState.WholePart;
 
-        if (firstChar === '-') {
+        if (this.settings.canStartWithPlus && firstChar === '+') {
+            // Do nothing...
+        } else if (firstChar === '-') {
             numberStr += firstChar;
         } else if (firstChar === '0') {
             numberStr += '0';
@@ -53,8 +61,10 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
             numberStr += firstChar;
 
             foundWholeDigit = true;
+        } else if (this.settings.canStartWithPlus) {
+            return () => `expected '${firstChar}' to be a '+', '-', or a digit (0-9) for a decimal number`;
         } else {
-            return () => `expected '${firstChar}' to be a '-' or /[0-9]/ for a decimal number`;
+            return () => `expected '${firstChar}' to be a '-' or a digit (0-9) for a decimal number`;
         }
 
         const finalizeAndVisit = () => {
@@ -76,7 +86,7 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
 
             if (char === '.') {
                 if (!foundWholeDigit) {
-                    return () => `expected '${char}' to be /[0-9]/ for a decimal number (whole part)`;
+                    return () => `expected '${char}' to be a digit (0-9) for a decimal number (whole part)`;
                 }
 
                 numberStr += '.';
@@ -84,7 +94,7 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
                 state = NumberState.DecimalPart;
             } else if (char === 'e' || char === 'E') {
                 if (!foundWholeDigit) {
-                    return () => `expected '${char}' to be /[0-9]/ for a decimal number (whole part)`;
+                    return () => `expected '${char}' to be a digit (0-9) for a decimal number (whole part)`;
                 }
 
                 numberStr += char;
@@ -126,7 +136,7 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
 
             if (char === undefined) {
                 if (!foundDecimalDigit) {
-                    return () => "unexpected end of file, expected 'e', 'E', or /[0-9]/ for a decimal number (decimal part)";
+                    return () => "unexpected end of file, expected 'e', 'E', or a digit (0-9) for a decimal number (decimal part)";
                 }
 
                 finalizeAndVisit();
@@ -159,7 +169,7 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
 
             if (char === undefined) {
                 if (!foundExponentDigit) {
-                    return () => 'unexpected end of file, expected /[0-9]/ for a decimal number (exponent part)';
+                    return () => 'unexpected end of file, expected a digit (0-9) for a decimal number (exponent part)';
                 }
 
                 finalizeAndVisit();
@@ -168,7 +178,7 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
 
             if (anySign.test(char) && !foundExponentDigit) {
                 if (foundExponentSign) {
-                    return () => `expected '${char}' to be /[0-9]/ for decimal number (exponent part)`;
+                    return () => `expected '${char}' to be a digit (0-9) for decimal number (exponent part)`;
                 }
 
                 numberStr += char;
