@@ -8,6 +8,7 @@ import {
 
 interface Settings {
     canStartWithPlus?: boolean;
+    laxDecimal?: boolean;
 }
 export {
     Settings as DecimalNumberFeatureSettings,
@@ -46,6 +47,7 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
         let foundDecimalDigit = false;
         let foundExponentSign = false;
         let foundExponentDigit = false;
+        let skippedWholePart = false;
         let state = NumberState.WholePart;
 
         if (this.settings.canStartWithPlus && firstChar === '+') {
@@ -86,7 +88,11 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
 
             if (char === '.') {
                 if (!foundWholeDigit) {
-                    return () => `expected '${char}' to be a digit (0-9) for a decimal number (whole part)`;
+                    if (this.settings.laxDecimal) {
+                        skippedWholePart = true;
+                    } else {
+                        return () => `expected '${char}' to be a digit (0-9) for a decimal number (whole part)`;
+                    }
                 }
 
                 numberStr += '.';
@@ -135,8 +141,8 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
             char = yield;
 
             if (char === undefined) {
-                if (!foundDecimalDigit) {
-                    return () => "unexpected end of file, expected 'e', 'E', or a digit (0-9) for a decimal number (decimal part)";
+                if (!foundDecimalDigit && (!this.settings.laxDecimal || skippedWholePart)) {
+                    return () => 'unexpected end of file, expected a digit (0-9) for a decimal number (decimal part)';
                 }
 
                 finalizeAndVisit();
