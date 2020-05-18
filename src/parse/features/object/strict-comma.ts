@@ -12,7 +12,6 @@ export {
     Settings as StrictCommaObjectFeatureSettings,
 };
 
-// TODO: store comments in metadata
 export default class StrictCommaObjectFeature extends AbstractFeature<Settings> {
     public settings: Settings;
 
@@ -36,81 +35,93 @@ export default class StrictCommaObjectFeature extends AbstractFeature<Settings> 
             impl: visitors.object,
         };
 
-        let keyVisitor;
+        let keyVisitor = visitors.object.seedKey(objContext);
         let char: string | undefined;
 
-        while (true) {
-            keyVisitor = visitors.object.seedKey(objContext);
+        // Parse any whitespace
+        char = yield {
+            action: FeatureAction.ParseChild,
+            features: this.settings.whitespace,
+            visitor: keyVisitor,
+            commitUntilNow: true,
+            whitespaceMode: true,
+        };
 
-            // Parse any whitespace
-            char = yield {
-                action: FeatureAction.ParseChild,
-                features: this.settings.whitespace,
-                visitor: keyVisitor,
-                commitUntilNow: true,
-                whitespaceMode: true,
-            };
+        if (char === '}') {
+            keyVisitor.impl.abort(keyVisitor.context);
+        } else {
+            while (true) {
+                // Parse a key
+                yield {
+                    action: FeatureAction.ParseChild,
+                    features: this.settings.keyFeatures,
+                    visitor: keyVisitor,
+                    commitUntilNow: false,
+                };
 
-            if (char === '}') {
-                keyVisitor.impl.abort(keyVisitor.context);
-                break;
-            }
+                // Parse any whitespace
+                char = yield {
+                    action: FeatureAction.ParseChild,
+                    features: this.settings.whitespace,
+                    visitor: keyVisitor,
+                    commitUntilNow: false,
+                    whitespaceMode: true,
+                };
 
-            // Parse a key
-            yield {
-                action: FeatureAction.ParseChild,
-                features: this.settings.keyFeatures,
-                visitor: keyVisitor,
-                commitUntilNow: false,
-            };
+                // Finalize the key
+                keyVisitor.impl.finalize(keyVisitor.context);
 
-            // Parse any whitespace
-            char = yield {
-                action: FeatureAction.ParseChild,
-                features: this.settings.whitespace,
-                visitor: keyVisitor,
-                commitUntilNow: false,
-                whitespaceMode: true,
-            };
+                // Parse the colon
+                if (char !== ':') {
+                    return () => `expected '${char}' to be ':' for a strict-comma object`;
+                }
 
-            // Finalize the key
-            keyVisitor.impl.finalize(keyVisitor.context);
+                // Parse any whitespace
+                yield {
+                    action: FeatureAction.ParseChild,
+                    features: this.settings.whitespace,
+                    visitor: objVisitor,
+                    commitUntilNow: true,
+                    whitespaceMode: true,
+                };
 
-            // Parse the colon
-            if (char !== ':') {
-                return () => `expected '${char}' to be ':' for a strict-comma object`;
-            }
+                // Parse a value
+                yield {
+                    action: FeatureAction.ParseChild,
+                    features: this.settings.valueFeatures,
+                    visitor: objVisitor,
+                    commitUntilNow: false,
+                };
 
-            // Parse any whitespace
-            yield {
-                action: FeatureAction.ParseChild,
-                features: this.settings.whitespace,
-                visitor: objVisitor,
-                commitUntilNow: true,
-                whitespaceMode: true,
-            };
+                // Parse any whitespace
+                char = yield {
+                    action: FeatureAction.ParseChild,
+                    features: this.settings.whitespace,
+                    visitor: objVisitor,
+                    commitUntilNow: false,
+                    whitespaceMode: true,
+                };
 
-            // Parse a value
-            yield {
-                action: FeatureAction.ParseChild,
-                features: this.settings.valueFeatures,
-                visitor: objVisitor,
-                commitUntilNow: false,
-            };
+                if (char === '}') {
+                    break;
+                } else if (char !== ',') {
+                    return () => `expected '${char}' to be ',' or '}' for a strict-comma object`;
+                }
 
-            // Parse any whitespace
-            char = yield {
-                action: FeatureAction.ParseChild,
-                features: this.settings.whitespace,
-                visitor: objVisitor,
-                commitUntilNow: false,
-                whitespaceMode: true,
-            };
+                keyVisitor = visitors.object.seedKey(objContext);
 
-            if (char === '}') {
-                break;
-            } else if (char !== ',') {
-                return () => `expected '${char}' to be ',' or '}' for a strict-comma object`;
+                // Parse any whitespace
+                char = yield {
+                    action: FeatureAction.ParseChild,
+                    features: this.settings.whitespace,
+                    visitor: keyVisitor,
+                    commitUntilNow: true,
+                    whitespaceMode: true,
+                };
+
+                if (char === '}') {
+                    return () => `expected '${char}' to begin a key for a strict-comma object`;
+                }
             }
         }
 

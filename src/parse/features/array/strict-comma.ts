@@ -11,7 +11,6 @@ export {
     Settings as StrictCommaArrayFeatureSettings,
 };
 
-// TODO: store comments in metadata
 export default class StrictCommaArrayFeature extends AbstractFeature<Settings> {
     public settings: Settings;
 
@@ -74,17 +73,22 @@ export default class StrictCommaArrayFeature extends AbstractFeature<Settings> {
                 visitors.array.markNextValue(arrContext);
 
                 // Parse any whitespace
-                yield {
+                char = yield {
                     action: FeatureAction.ParseChild,
                     features: this.settings.whitespace,
                     visitor: arrVisitor,
                     commitUntilNow: true,
                     whitespaceMode: true,
                 };
+
+                if (char === ']') {
+                    return () => `expected '${char}' to begin a value for a strict-comma array`;
+                }
             }
         }
 
         const value = visitors.array.finalize(arrContext);
+        visitor.impl.setMetadata(visitor.context, 'array.type', 'strict-comma');
         visitor.impl.visitValue(visitor.context, value);
 
         return FeatureResult.Commit;
