@@ -75,8 +75,8 @@ This one isn't as pretty, but it's Input -> (Stringifier Engine <-> Tokenizer) -
     * [ ] JSON5
         * [X] JSON (minus object, array, and number)
         * [ ] ECMAScript IdentifierName (*built but untested*)
-        * [ ] Lax-comma object
-        * [ ] Lax-comma array
+        * [ ] Lax-comma object (*built but untested*)
+        * [ ] Lax-comma array (*built but untested*)
         * [X] Single-quoted string
         * [ ] Hexadecimal number (*built but untested*)
         * [ ] Lax decimal number (start/end with ., start with +) (*built but untested*)
