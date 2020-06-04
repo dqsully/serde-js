@@ -1,16 +1,16 @@
 // eslint-disable-next-line import/prefer-default-export
 export class Index {
-    public line: number = 1;
+    public line = 1;
 
-    public column: number = 1;
+    public column = 1;
 
-    public eof: boolean = false;
+    public eof = false;
 
-    private committedLine: number = 1;
+    private committedLine = 1;
 
-    private committedColumn: number = 1;
+    private committedColumn = 1;
 
-    private committedEof: boolean = false;
+    private committedEof = false;
 
     public step(char: string | undefined) {
         if (char === undefined) {

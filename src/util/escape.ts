@@ -164,6 +164,7 @@ export function escape(string: string, quote?: string) {
             output += `\\${quote}`;
             lastIndex = i + 1;
         } else {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             codepoint = char.codePointAt(0)!;
 
             if (isUnprintable(codepoint) || isGraphemeExtend(codepoint)) {

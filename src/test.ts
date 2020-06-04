@@ -1,9 +1,10 @@
+/* eslint-disable no-console */
 import 'source-map-support/register';
 
 import util from 'util';
 
-import { parseAstMetadata, parseNoMetadata, parseWrappedMetadata } from './test/parse';
-import { stringifyNoMetadata, stringifyWrappedMetadata } from './test/stringify';
+import { parseAstMetadata, parseNoMetadata, parseWrappedMetadata } from './test.old/parse';
+import { stringifyNoMetadata, stringifyWrappedMetadata } from './test.old/stringify';
 
 const stringWithEverything = `
 {

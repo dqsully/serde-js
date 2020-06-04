@@ -114,6 +114,7 @@ export default class IdentifierNameStringFeature extends AbstractFeature<Setting
             } else if (char === '$' || char === '_') {
                 output += char;
             } else {
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 const codepoint = char.codePointAt(0)!;
 
                 if (first && isIdStart(codepoint)) {

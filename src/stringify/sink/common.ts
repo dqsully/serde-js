@@ -25,13 +25,13 @@ enum FrameType {
 interface RootFrame {
     type: FrameType.Root;
 
-    feature: ReturnType<RootFeature>,
+    feature: ReturnType<RootFeature>;
 }
 
 interface ObjectFrame {
     type: FrameType.Object;
 
-    feature: NonNullable<ReturnType<ObjectFeature>>,
+    feature: NonNullable<ReturnType<ObjectFeature>>;
     isKey: boolean;
     isSeparator: boolean;
     foundData: boolean;
@@ -40,7 +40,7 @@ interface ObjectFrame {
 interface ArrayFrame {
     type: FrameType.Array;
 
-    feature: NonNullable<ReturnType<ArrayFeature>>,
+    feature: NonNullable<ReturnType<ArrayFeature>>;
     isSeparator: boolean;
     foundData: boolean;
 }

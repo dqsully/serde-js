@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable no-bitwise */
 export interface VisitorContext {
     state: number;

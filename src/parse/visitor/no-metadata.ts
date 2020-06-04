@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import {
     AbstractRootVisitor,
     AbstractObjectVisitor,
@@ -20,6 +21,7 @@ interface ArrayContext extends VisitorContext {
 
 export type NoMetadataValueVisitor = AbstractRootVisitor<RootContext>;
 const NoMetadataRootVisitor: NoMetadataValueVisitor = {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     _C: null!,
 
     initialize() {
@@ -45,6 +47,7 @@ const NoMetadataRootVisitor: NoMetadataValueVisitor = {
 
 export type NoMetadataObjectVisitor = AbstractObjectVisitor<ObjectContext, any>;
 const NoMetadataObjectVisitor: NoMetadataObjectVisitor = {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     _C: null!,
 
     initialize() {
@@ -70,6 +73,7 @@ const NoMetadataObjectVisitor: NoMetadataObjectVisitor = {
         VisitorContext.assertHasScratch(context, 'Not visiting a key yet');
         VisitorContext.clearHasScratch(context);
 
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         context.value[context.key!] = value;
     },
 
@@ -86,6 +90,7 @@ const NoMetadataObjectVisitor: NoMetadataObjectVisitor = {
 
 export type NoMetadataObjectKeyVisitor = AbstractObjectKeyVisitor<ObjectContext>;
 const NoMetadataObjectKeyVisitor: NoMetadataObjectKeyVisitor = {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     _C: null!,
 
     pushInvisible() {},
@@ -115,6 +120,7 @@ const NoMetadataObjectKeyVisitor: NoMetadataObjectKeyVisitor = {
 
 export type NoMetadataArrayVisitor = AbstractArrayVisitor<ArrayContext, any>;
 const NoMetadataArrayVisitor: NoMetadataArrayVisitor = {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     _C: null!,
 
     initialize() {

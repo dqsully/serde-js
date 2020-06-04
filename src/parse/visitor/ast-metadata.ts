@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import {
     AbstractRootVisitor,
     AbstractObjectVisitor,
@@ -65,6 +66,7 @@ type AnyContext = RootContext | ObjectContext | ArrayContext;
 
 export type AstMetadataRootVisitor = AbstractRootVisitor<RootContext>;
 const AstMetadataRootVisitor: AstMetadataRootVisitor = {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     _C: null!,
 
     initialize() {
@@ -113,6 +115,7 @@ const AstMetadataRootVisitor: AstMetadataRootVisitor = {
 
 export type AstMetadataObjectVisitor = AbstractObjectVisitor<ObjectContext, AnyContext>;
 const AstMetadataObjectVisitor: AstMetadataObjectVisitor = {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     _C: null!,
 
     initialize(parent: AnyContext) {
@@ -183,6 +186,7 @@ const AstMetadataObjectVisitor: AstMetadataObjectVisitor = {
         VisitorContext.clearHasScratch(context);
         VisitorContext.setNotEmpty(context);
 
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         context.value[context.key!] = value;
     },
 
@@ -196,6 +200,7 @@ const AstMetadataObjectVisitor: AstMetadataObjectVisitor = {
                 context.node.childMeta = new Map();
             }
 
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             context.node.childMeta.set(context.key!, {
                 key: context.tmpKeyNode,
                 value: context.tmpNode,
@@ -217,6 +222,7 @@ const AstMetadataObjectVisitor: AstMetadataObjectVisitor = {
 
 export type AstMetadataObjectKeyVisitor = AbstractObjectKeyVisitor<ObjectContext>;
 const AstMetadataObjectKeyVisitor: AstMetadataObjectKeyVisitor = {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     _C: null!,
 
     pushInvisible(context: ObjectContext, kind: string, value: MetadataValue) {
@@ -269,6 +275,7 @@ const AstMetadataObjectKeyVisitor: AstMetadataObjectKeyVisitor = {
 
 export type AstMetadataArrayVisitor = AbstractArrayVisitor<ArrayContext, AnyContext>;
 const AstMetadataArrayVisitor: AstMetadataArrayVisitor = {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     _C: null!,
 
     initialize(parent: AnyContext) {

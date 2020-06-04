@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import { MetadataRecord, MetadataMap, MetadataValue } from '../../types/metadata';
 import { VisitorContext } from './context';
 import {
@@ -89,6 +90,7 @@ type AnyContext = RootContext | ObjectContext | ArrayContext;
 
 export type WrappedMetadataRootVisitor = AbstractRootVisitor<RootContext>;
 const WrappedMetadataRootVisitor: WrappedMetadataRootVisitor = {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     _C: null!,
 
     initialize() {
@@ -127,6 +129,7 @@ const WrappedMetadataRootVisitor: WrappedMetadataRootVisitor = {
 
         const wrapped = context.meta as WrappedAny;
 
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         wrapped.contents = context.value!;
 
         return wrapped;
@@ -150,6 +153,7 @@ const WrappedMetadataRootVisitor: WrappedMetadataRootVisitor = {
 
 export type WrappedMetadataObjectVisitor = AbstractObjectVisitor<ObjectContext, AnyContext>;
 const WrappedMetadataObjectVisitor: WrappedMetadataObjectVisitor = {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     _C: null!,
 
     initialize() {
@@ -207,6 +211,7 @@ const WrappedMetadataObjectVisitor: WrappedMetadataObjectVisitor = {
             const value = context.tmpMeta as WrappedAny;
 
             key.contents = { value: context.tmpKey };
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             value.contents = context.tmp!;
 
             context.value.children.set(context.tmpKey, { key, value });
@@ -238,8 +243,10 @@ const WrappedMetadataObjectVisitor: WrappedMetadataObjectVisitor = {
             const value = context.tmpMeta as WrappedAny;
 
             key.contents = { value: context.tmpKey };
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             value.contents = context.tmp!;
 
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             context.value.children.set(context.tmpKey!, { key, value });
 
             context.tmpKeyMeta = {};
@@ -258,6 +265,7 @@ const WrappedMetadataObjectVisitor: WrappedMetadataObjectVisitor = {
 
 export type WrappedMetadataObjectKeyVisitor = AbstractObjectKeyVisitor<ObjectContext>;
 const WrappedMetadataObjectKeyVisitor: WrappedMetadataObjectKeyVisitor = {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     _C: null!,
 
     pushInvisible(context: ObjectContext, kind: string, value: MetadataValue) {
@@ -310,6 +318,7 @@ const WrappedMetadataObjectKeyVisitor: WrappedMetadataObjectKeyVisitor = {
 
 export type WrappedMetadataArrayVisitor = AbstractArrayVisitor<ArrayContext, AnyContext>;
 const WrappedMetadataArrayVisitor: WrappedMetadataArrayVisitor = {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     _C: null!,
 
     initialize() {
@@ -359,6 +368,7 @@ const WrappedMetadataArrayVisitor: WrappedMetadataArrayVisitor = {
             VisitorContext.releaseLock(context, 'Unreachable');
 
             const value = context.tmpMeta as WrappedAny;
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             value.contents = context.tmp!;
 
             context.value.children.push(value);
@@ -388,6 +398,7 @@ const WrappedMetadataArrayVisitor: WrappedMetadataArrayVisitor = {
         VisitorContext.releaseLock(context, 'Next value has already been marked');
 
         const value = context.tmpMeta as WrappedAny;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         value.contents = context.tmp!;
 
         context.value.children.push(value);

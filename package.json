@@ -17,7 +17,10 @@
         "hjson": "./lib/bin/hjson"
     },
     "scripts": {
-        "build": "tsc"
+        "build": "tsc",
+        "build-prod": "tsc -p tsconfig-prod.json",
+        "lint": "eslint --ext .js,.jsx,.ts,.tsx ./src",
+        "test": "mocha src/**/*.test.ts"
     },
     "homepage": "http://hjson.org",
     "repository": {
@@ -29,16 +32,24 @@
     },
     "license": "MIT",
     "devDependencies": {
-        "@typescript-eslint/eslint-plugin": "^2.25.0",
-        "@typescript-eslint/parser": "^2.25.0",
+        "@types/chai": "^4.2.11",
+        "@types/mocha": "^7.0.2",
+        "@typescript-eslint/eslint-plugin": "^2.34.0",
+        "@typescript-eslint/parser": "^2.34.0",
+        "chai": "^4.2.0",
         "eslint": "^6.8.0",
         "eslint-config-airbnb-typescript": "^6.3.2",
-        "eslint-plugin-import": "^2.20.1",
+        "eslint-plugin-import": "^2.20.2",
+        "eslint-plugin-jsx-a11y": "^6.2.3",
+        "eslint-plugin-react": "^7.20.0",
+        "eslint-plugin-react-hooks": "^4.0.4",
         "got": "^10.7.0",
-        "typescript": "^3.8.3"
+        "ts-node": "^8.10.2",
+        "typescript": "^3.9.3"
     },
     "dependencies": {
-        "@types/node": "^13.9.3",
-        "source-map-support": "^0.5.16"
+        "@types/node": "^13.13.9",
+        "mocha": "^7.2.0",
+        "source-map-support": "^0.5.19"
     }
 }

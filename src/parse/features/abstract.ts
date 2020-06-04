@@ -6,20 +6,20 @@ export enum FeatureAction {
 }
 
 export interface ParseChild {
-    action: FeatureAction.ParseChild,
+    action: FeatureAction.ParseChild;
 
-    visitor: Visitor,
-    features: AbstractFeature[],
-    commitUntilNow: boolean,
-    whitespaceMode?: boolean,
-    peekFinalizers?: PeekAhead,
+    visitor: Visitor;
+    features: AbstractFeature[];
+    commitUntilNow: boolean;
+    whitespaceMode?: boolean;
+    peekFinalizers?: PeekAhead;
 }
 
 export interface PeekAhead {
-    action: FeatureAction.PeekAhead,
+    action: FeatureAction.PeekAhead;
 
-    finalizers: Peeker[],
-    fillers: Peeker[],
+    finalizers: Peeker[];
+    fillers: Peeker[];
 }
 
 export enum FeatureResult {

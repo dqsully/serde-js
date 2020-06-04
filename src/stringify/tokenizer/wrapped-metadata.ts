@@ -210,6 +210,7 @@ export default function* wrappedMetadataTokenizer(data: WrappedAny): TokenizerRe
                     };
                 }
 
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 const kv = frame.data.contents.children.get(nextKey.value)!;
                 subKey = kv.key;
                 subData = kv.value;

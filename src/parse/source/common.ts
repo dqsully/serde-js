@@ -12,12 +12,12 @@ import {
 import { Index, ParseError, IndexRef } from '../error';
 
 interface StackFrame {
-    visitor: Visitor,
-    features: AbstractFeature[],
-    featureIndex: number,
-    liveFeature: AbstractFeatureParseReturn,
-    whitespaceMode: boolean,
-    peekFinalizers: PeekAhead | undefined,
+    visitor: Visitor;
+    features: AbstractFeature[];
+    featureIndex: number;
+    liveFeature: AbstractFeatureParseReturn;
+    whitespaceMode: boolean;
+    peekFinalizers: PeekAhead | undefined;
 }
 
 enum ParseCharResult {
@@ -63,7 +63,7 @@ function* parseChars(
         true | ParseChild | PeekAhead | undefined,
         FeatureResult | (() => string)
     >;
-    let whitespaceMode: boolean = false;
+    let whitespaceMode = false;
     let peekFinalizers: PeekAhead | undefined;
 
     while (true) {

@@ -50,8 +50,8 @@ export interface Visitor<V extends AbstractVisitor<any> = AbstractVisitor<any>> 
 }
 
 export interface Visitors {
-    root: AbstractRootVisitor<VisitorContext>,
-    object: AbstractObjectVisitor<VisitorContext, VisitorContext>,
-    objectKey: AbstractObjectKeyVisitor<VisitorContext>,
-    array: AbstractArrayVisitor<VisitorContext, VisitorContext>,
+    root: AbstractRootVisitor<VisitorContext>;
+    object: AbstractObjectVisitor<VisitorContext, VisitorContext>;
+    objectKey: AbstractObjectKeyVisitor<VisitorContext>;
+    array: AbstractArrayVisitor<VisitorContext, VisitorContext>;
 }

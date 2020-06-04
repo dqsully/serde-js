@@ -55,8 +55,8 @@ export default class BooleanFeature extends AbstractFeature<Settings> {
         // Commit all parsed chars
         if (peekFinalizers !== undefined) {
             return FeatureResult.CommitUntilLast;
+        } else {
+            return FeatureResult.Commit;
         }
-
-        return FeatureResult.Commit;
     }
 }
