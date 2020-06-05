@@ -7,13 +7,13 @@ const nanChars = 'NaN'.split('');
 
 interface Settings {}
 export {
-    Settings as BooleanFeatureSettings,
+    Settings as NanFeatureSettings,
 };
 
-export default class BooleanFeature extends AbstractFeature<Settings> {
+export default class NanFeature extends AbstractFeature<Settings> {
     public settings: Settings = {};
 
-    // We don't use `this` because there are no settings for `BooleanFeature`
+    // We don't use `this` because there are no settings for `NanFeature`
     public* parse(
         firstChar: string,
         visitor: Visitor,
