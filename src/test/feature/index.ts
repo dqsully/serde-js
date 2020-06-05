@@ -5,42 +5,43 @@ import createVisitors, { VisitorEvent } from './visitor';
 import parseString from '../../parse/source/string';
 import ProxyFeature from './proxy';
 import DummyFeature from './dummy';
+import { ParseError } from '../../parse/error';
 
 export type LogEntry = {
     type: 'visit';
-    visitorId: string | undefined;
+    visitorId?: string | undefined;
 
     // TODO: value param?
 } | {
     type: 'invisible';
-    visitorId: string | undefined;
+    visitorId?: string | undefined;
 
     kind: string;
     value: MetadataValue;
 } | {
     type: 'init-array-visitor';
     storeAsId: string;
-    parentId: string | undefined;
+    parentId?: string | undefined;
 } | {
     type: 'init-object-visitor';
     storeAsId: string;
-    parentId: string | undefined;
+    parentId?: string | undefined;
 } | {
     type: 'seed-object-key';
     storeAsId: string;
-    objectVisitorId: string | undefined;
+    objectVisitorId: string;
 } | {
     type: 'mark-next-value';
     arrayVisitorId: string;
 } | {
     type: 'finalize';
-    visitorId: string;
+    visitorId?: string;
 
-    meta: MetadataMap;
+    meta?: MetadataMap;
     // TODO: value param?
 } | {
     type: 'abort';
-    visitorId: string;
+    objectVisitorId: string;
 } | {
     type: 'error';
 
@@ -83,19 +84,41 @@ export function testFeature(
     );
 }
 
+export interface TestResultOk {
+    finished: true;
+    value: any;
+}
+
+export interface TestResultErr {
+    finished: false;
+    error: ParseError;
+}
+
+type TestResult = TestResultOk | TestResultErr;
+
 export function testFeatureWithLog(
     feature: AbstractFeature,
     input: string,
     expectedLog: LogEntry[],
-): any {
+): TestResult {
     let index = -1;
 
-    function initCallback() {
+    function getEntry(event: unknown) {
         const entry = expectedLog[index];
 
         if (entry === undefined) {
+            // eslint-disable-next-line no-console
+            console.log('Event:', event);
             throw new Error('Encountered more events than in the expected log');
         }
+
+        return entry;
+    }
+
+    function initCallback() {
+        const entry = getEntry({
+            type: 'init-or-seed',
+        });
 
         if ('storeAsId' in entry) {
             return entry.storeAsId;
@@ -106,11 +129,7 @@ export function testFeatureWithLog(
     function eventCallback(event: VisitorEvent) {
         index += 1;
 
-        const entry = expectedLog[index];
-
-        if (entry === undefined) {
-            throw new Error('Encountered more events than in the expected log');
-        }
+        const entry = getEntry(event);
 
         if (event.type !== entry.type) {
             throw new Error(`Expected event of type '${entry.type}' but got type '${event.type}' at index ${index}`);
@@ -127,17 +146,17 @@ export function testFeatureWithLog(
             if (typeof value.value === 'function') {
                 index += 1;
 
-                const entry = expectedLog[index];
+                const message = value.value();
 
-                if (entry === undefined) {
-                    throw new Error('Encountered more events than in the expected log');
-                }
+                const entry = getEntry({
+                    type: 'error',
+                    message,
+                });
 
                 if (entry.type !== 'error') {
                     throw new Error(`Expected event of type '${entry.type}' but got type 'error' instead at ${index}`);
                 }
 
-                const message = value.value();
                 if (entry.message !== message) {
                     throw new Error(`Expected error message '${entry.message}' but got '${message}' at index ${index}`);
                 }
@@ -147,11 +166,17 @@ export function testFeatureWithLog(
                 if (value.value.action === FeatureAction.ParseChild) {
                     index += 1;
 
-                    const entry = expectedLog[index];
+                    const childFeature = value.value.features[0];
 
-                    if (entry === undefined) {
-                        throw new Error('Encountered more events than in the expected log');
+                    if (!(childFeature instanceof DummyFeature)) {
+                        throw new Error(`Expected child feature to be an instance of DummyFeature at ${index}`);
                     }
+
+                    const entry = getEntry({
+                        type: 'child',
+                        dummyId: childFeature.settings.id,
+                        whitespace: value.value.whitespaceMode || false,
+                    });
 
                     if (entry.type !== 'child') {
                         throw new Error(`Expected event of type '${entry.type}' but got type 'child' instead at ${index}`);
@@ -159,12 +184,6 @@ export function testFeatureWithLog(
 
                     if (value.value.features.length > 1) {
                         throw new Error(`Expected only one child feature at index ${index}`);
-                    }
-
-                    const childFeature = value.value.features[0];
-
-                    if (!(childFeature instanceof DummyFeature)) {
-                        throw new Error(`Expected child feature to be an instance of DummyFeature at ${index}`);
                     }
 
                     if (childFeature.settings.id !== entry.dummyId) {
@@ -191,13 +210,29 @@ export function testFeatureWithLog(
         feature,
     });
 
-    return parseString(
-        input,
-        {
-            context: visitors.root.initialize(),
-            impl: visitors.root,
-        },
-        [rootFeature],
-        visitors,
-    );
+    try {
+        const value = parseString(
+            input,
+            {
+                context: visitors.root.initialize(),
+                impl: visitors.root,
+            },
+            [rootFeature],
+            visitors,
+        );
+
+        return {
+            finished: true,
+            value,
+        };
+    } catch (error) {
+        if (error instanceof ParseError) {
+            return {
+                finished: false,
+                error,
+            };
+        } else {
+            throw error;
+        }
+    }
 }
