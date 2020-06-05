@@ -162,15 +162,16 @@ This one isn't as pretty, but it's Input -> (Stringifier Engine <-> Tokenizer) -
 
 * Sources
     * [X] String
-    * [ ] Stream
+    * [ ] Stream (*built but untested*)
 
 * Sinks
     * [X] String
-    * [ ] Stream
+    * [ ] Stream (*built but untested*)
 
 * Other features
     * [X] Full unicode support (thanks Rust for the inspiration!)
     * [X] Parser error messages with location data
+    * [ ] Recursion detection on sinks
     * [ ] Stringifier error messages with a data "stack trace"
     * [ ] Tests
         * [ ] Features
