@@ -9,8 +9,6 @@ export {
 export default class AnyWhitespaceFeature extends AbstractFeature<Settings> {
     public settings: Settings = {};
 
-    // We don't use `this` because there are no settings for `BooleanFeature`
-    // eslint-disable-next-line class-methods-use-this
     public* parse(firstChar: string, visitor: Visitor): AbstractFeatureParseReturn {
         if (
             firstChar !== ' '

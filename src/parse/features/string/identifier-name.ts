@@ -15,8 +15,6 @@ export {
 export default class IdentifierNameStringFeature extends AbstractFeature<Settings> {
     public settings: Settings = {};
 
-    // We don't use `this` because there are no settings for `IdentifierNameStringFeature`
-    // eslint-disable-next-line class-methods-use-this
     public* parse(
         firstChar: string,
         visitor: Visitor,

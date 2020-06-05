@@ -9,8 +9,6 @@ export {
 export default class NothingFeature extends AbstractFeature<Settings> {
     public settings: Settings = {};
 
-    // We don't use `this` because there are no settings for `BooleanFeature`
-    // eslint-disable-next-line class-methods-use-this
     // eslint-disable-next-line require-yield
     public* parse(): AbstractFeatureParseReturn {
         return FeatureResult.Ignore;

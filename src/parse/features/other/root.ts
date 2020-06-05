@@ -19,8 +19,6 @@ export default class RootFeature extends AbstractFeature<Settings> {
         this.settings = settings;
     }
 
-    // We don't use `this` because there are no settings for `BooleanFeature`
-    // eslint-disable-next-line class-methods-use-this
     public* parse(_firstChar: string, visitor: Visitor): AbstractFeatureParseReturn {
         if (this.settings.whitespace.length > 0) {
             // Try and parse whitespace first
