@@ -72,16 +72,16 @@ This one isn't as pretty, but it's Input -> (Stringifier Engine <-> Tokenizer) -
         * [X] Double-slash comment
         * [X] Slash-star comment
 
-    * [ ] JSON5
+    * [X] JSON5
         * [X] JSON (minus object, array, and number)
-        * [ ] ECMAScript IdentifierName (*built but untested*)
-        * [ ] Lax-comma object (*built but untested*)
-        * [ ] Lax-comma array (*built but untested*)
+        * [X] ECMAScript IdentifierName
+        * [X] Lax-comma object
+        * [X] Lax-comma array
         * [X] Single-quoted string
-        * [ ] Hexadecimal number (*built but untested*)
-        * [ ] Lax decimal number (start/end with ., start with +) (*built but untested*)
-        * [ ] Infinity (*built but untested*)
-        * [ ] NaN (*built but untested*)
+        * [X] Hexadecimal number
+        * [X] Lax decimal number (start/end with ., start with +)
+        * [X] Infinity
+        * [X] NaN
         * [X] Double-slash comment
         * [X] Slash-star comment
 
