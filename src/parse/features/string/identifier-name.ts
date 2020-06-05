@@ -1,6 +1,6 @@
 import { Visitor, Visitors } from '../../visitor/abstract';
 import {
-    AbstractFeature, AbstractFeatureParseReturn, FeatureResult, PeekAhead,
+    AbstractFeature, AbstractFeatureParseReturn, FeatureResult, Peekers, FeatureAction,
 } from '../abstract';
 import isIdStart from '../../../util/id-start';
 import isIdContinue from '../../../util/id-continue';
@@ -20,9 +20,8 @@ export default class IdentifierNameStringFeature extends AbstractFeature<Setting
     public* parse(
         firstChar: string,
         visitor: Visitor,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         _visitors: Visitors,
-        peekFinalizers?: PeekAhead,
+        peekers?: Peekers,
     ): AbstractFeatureParseReturn {
         let char: string | undefined = firstChar;
         let output = '';
@@ -141,14 +140,19 @@ export default class IdentifierNameStringFeature extends AbstractFeature<Setting
             first = false;
         }
 
-        if (char !== undefined && peekFinalizers !== undefined) {
-            yield peekFinalizers;
+        if (char !== undefined && peekers !== undefined) {
+            yield {
+                action: FeatureAction.PeekAhead,
+                peekers,
+                retryChar: true,
+            };
         }
 
         visitor.impl.visitValue(visitor.context, output);
         visitor.impl.setMetadata(visitor.context, 'string.type', 'identifier-name');
 
-        if (char !== undefined && peekFinalizers !== undefined) {
+        // We need to retry the last char whether or not we were given a peeker
+        if (char !== undefined) {
             return FeatureResult.CommitUntilLast;
         }
 

@@ -46,6 +46,10 @@ export function* unescape() {
                     output += '\0';
                     break;
 
+                case '\n':
+                    output += '';
+                    break;
+
                 default:
                     if (char === 'x') {
                         char = yield true;
@@ -121,7 +125,7 @@ export function* unescape() {
             }
 
             escaped = false;
-        } else if (char === '\'') {
+        } else if (char === '\\') {
             escaped = true;
         } else {
             output += char;

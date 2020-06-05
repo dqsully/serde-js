@@ -1,4 +1,4 @@
-import { AbstractFeature, AbstractFeatureParseReturn, PeekAhead } from '../../parse/features/abstract';
+import { AbstractFeature, AbstractFeatureParseReturn, Peekers } from '../../parse/features/abstract';
 import { Visitor, Visitors } from '../../parse/visitor/abstract';
 
 export interface ProxyFeatureSettings {
@@ -18,13 +18,13 @@ export default class ProxyFeature extends AbstractFeature<ProxyFeatureSettings> 
         firstChar: string,
         visitor: Visitor,
         visitors: Visitors,
-        peekFinalizers?: PeekAhead,
+        peekers?: Peekers,
     ): AbstractFeatureParseReturn {
         const iterator = this.settings.feature.parse(
             firstChar,
             visitor,
             visitors,
-            peekFinalizers,
+            peekers,
         );
 
         // Generators don't use yielded arguments on the first `next` call

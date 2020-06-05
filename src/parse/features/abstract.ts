@@ -12,14 +12,19 @@ export interface ParseChild {
     features: AbstractFeature[];
     commitUntilNow: boolean;
     whitespaceMode?: boolean;
-    peekFinalizers?: PeekAhead;
+    peekers?: Peekers;
+}
+
+export interface Peekers {
+    finalizers: Peeker[];
+    fillers: Peeker[];
 }
 
 export interface PeekAhead {
     action: FeatureAction.PeekAhead;
 
-    finalizers: Peeker[];
-    fillers: Peeker[];
+    peekers: Peekers;
+    retryChar?: boolean;
 }
 
 export enum FeatureResult {
@@ -41,7 +46,7 @@ export abstract class AbstractFeature<S extends object = object> {
         char: string,
         visitor: Visitor,
         visitors: Visitors,
-        peekFinalizers?: PeekAhead,
+        peekers?: Peekers,
     ): AbstractFeatureParseReturn;
 }
 

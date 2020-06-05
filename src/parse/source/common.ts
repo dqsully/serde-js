@@ -5,9 +5,10 @@ import {
     AbstractFeatureParseReturn,
     ParseChild,
     FeatureResult,
-    PeekAhead,
     FeatureAction,
     AbstractFeaturePeekReturn,
+    Peekers,
+    PeekAhead,
 } from '../features/abstract';
 import { Index, ParseError, IndexRef } from '../error';
 
@@ -17,7 +18,7 @@ interface StackFrame {
     featureIndex: number;
     liveFeature: AbstractFeatureParseReturn;
     whitespaceMode: boolean;
-    peekFinalizers: PeekAhead | undefined;
+    peekers: Peekers | undefined;
 }
 
 enum ParseCharResult {
@@ -64,7 +65,7 @@ function* parseChars(
         FeatureResult | (() => string)
     >;
     let whitespaceMode = false;
-    let peekFinalizers: PeekAhead | undefined;
+    let peekers: Peekers | undefined;
 
     while (true) {
         // console.log(`yield: ${ParseCharResult[nextYield]}`);
@@ -111,7 +112,7 @@ function* parseChars(
                         featureIndex,
                         liveFeature,
                         whitespaceMode,
-                        peekFinalizers,
+                        peekers,
                     } = frame);
 
                     featureReturn = liveFeature.next(char);
@@ -138,7 +139,7 @@ function* parseChars(
                     char,
                     visitor,
                     visitors,
-                    peekFinalizers,
+                    peekers,
                 );
 
                 // Generators don't use yielded arguments on the first `next` call
@@ -246,7 +247,7 @@ function* parseChars(
                         featureIndex,
                         liveFeature,
                         whitespaceMode,
-                        peekFinalizers,
+                        peekers,
                     } = frame);
                 }
             }
@@ -265,7 +266,7 @@ function* parseChars(
                     featureIndex,
                     liveFeature,
                     whitespaceMode,
-                    peekFinalizers,
+                    peekers,
                 });
 
                 let commitUntilNow;
@@ -275,7 +276,7 @@ function* parseChars(
                     features,
                     commitUntilNow,
                     whitespaceMode = false,
-                    peekFinalizers,
+                    peekers,
                 } = featureReturn.value);
                 featureIndex = 0;
                 liveFeature = undefined;
@@ -295,7 +296,10 @@ function* parseChars(
             } else {
                 // The feature yielded a peek ahead case
 
-                const { finalizers, fillers } = featureReturn.value;
+                const {
+                    peekers: { finalizers, fillers },
+                    retryChar,
+                } = featureReturn.value;
 
                 type ActivePeeker = AbstractFeaturePeekReturn | undefined;
                 const currentFinalizers: ActivePeeker[] = new Array(finalizers.length);
@@ -313,7 +317,11 @@ function* parseChars(
 
                 // Take the next char and start peeking, but tell the loop not
                 // to get another char by setting `retry` to true
-                char = yield ParseCharResult.BeginPeek;
+                if (retryChar) {
+                    char = yield ParseCharResult.BeginPeekAndRetry;
+                } else {
+                    char = yield ParseCharResult.BeginPeek;
+                }
 
                 while (!done) {
                     if (!retry) {

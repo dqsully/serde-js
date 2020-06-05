@@ -1,6 +1,6 @@
 import { Visitor, Visitors } from '../../visitor/abstract';
 import {
-    AbstractFeature, AbstractFeatureParseReturn, FeatureResult, PeekAhead,
+    AbstractFeature, AbstractFeatureParseReturn, FeatureResult, Peekers, FeatureAction,
 } from '../abstract';
 
 const infinityChars = 'Infinity'.split('');
@@ -18,9 +18,8 @@ export default class InfinityFeature extends AbstractFeature<Settings> {
     public* parse(
         firstChar: string,
         visitor: Visitor,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         _visitors: Visitors,
-        peekFinalizers?: PeekAhead,
+        peekers?: Peekers,
     ): AbstractFeatureParseReturn {
         let char: string | undefined = firstChar;
         let negative = false;
@@ -32,10 +31,10 @@ export default class InfinityFeature extends AbstractFeature<Settings> {
                 negative = true;
             } else if (this.settings.canStartWithPlus) {
                 if (firstChar !== '+') {
-                    return () => `expected ${char} to be '+', '-', or 'I' for infinity (prefix)`;
+                    return () => `expected '${char}' to be '+', '-', or 'I' for infinity (prefix)`;
                 }
             } else {
-                return () => `expected ${char} to be '-' or 'I' for infinity (prefix)`;
+                return () => `expected '${char}' to be '-' or 'I' for infinity (prefix)`;
             }
 
             char = yield;
@@ -44,7 +43,7 @@ export default class InfinityFeature extends AbstractFeature<Settings> {
                 return () => 'unexpected end of file';
             }
             if (char !== 'I') {
-                return () => `expected ${char} to be 'I' for infinity (prefix)`;
+                return () => `expected '${char}' to be 'I' for infinity (prefix)`;
             }
         }
 
@@ -56,12 +55,15 @@ export default class InfinityFeature extends AbstractFeature<Settings> {
                 return () => 'unexpected end of file';
             }
             if (char !== infinityChars[i]) {
-                return () => `expected '${char}' to be '${infinityChars[i]}' for infinity`;
+                return () => `expected ''${char}'' to be '${infinityChars[i]}' for infinity`;
             }
         }
 
-        if (peekFinalizers !== undefined) {
-            yield peekFinalizers;
+        if (peekers !== undefined) {
+            yield {
+                action: FeatureAction.PeekAhead,
+                peekers,
+            };
         }
 
         if (negative) {
@@ -71,7 +73,7 @@ export default class InfinityFeature extends AbstractFeature<Settings> {
         }
 
         // Commit all parsed chars
-        if (peekFinalizers !== undefined) {
+        if (peekers !== undefined) {
             return FeatureResult.CommitUntilLast;
         }
 

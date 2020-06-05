@@ -3,7 +3,8 @@ import {
     AbstractFeature,
     AbstractFeatureParseReturn,
     FeatureResult,
-    PeekAhead,
+    Peekers,
+    FeatureAction,
 } from '../abstract';
 
 interface Settings {
@@ -36,9 +37,8 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
     public* parse(
         firstChar: string,
         visitor: Visitor,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         _visitors: Visitors,
-        peekFinalizers?: PeekAhead,
+        peekers?: Peekers,
     ): AbstractFeatureParseReturn {
         let numberStr = '';
 
@@ -52,6 +52,9 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
 
         if (this.settings.canStartWithPlus && firstChar === '+') {
             // Do nothing...
+        } else if (this.settings.laxDecimal && firstChar === '.') {
+            numberStr += '0.';
+            state = NumberState.DecimalPart;
         } else if (firstChar === '-') {
             numberStr += firstChar;
         } else if (firstChar === '0') {
@@ -107,15 +110,15 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
 
                 state = NumberState.ExponentPart;
             } else if (wholeIsZero) {
-                if (peekFinalizers !== undefined) {
-                    yield peekFinalizers;
-
-                    finalizeAndVisit();
-                    return FeatureResult.CommitUntilLast;
+                if (peekers !== undefined) {
+                    yield {
+                        action: FeatureAction.PeekAhead,
+                        peekers,
+                    };
                 }
 
                 finalizeAndVisit();
-                return FeatureResult.Commit;
+                return FeatureResult.CommitUntilLast;
             } else if (anyDigit.test(char)) {
                 if (!foundWholeDigit && char === '0') {
                     wholeIsZero = true;
@@ -125,15 +128,15 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
 
                 foundWholeDigit = true;
             } else {
-                if (peekFinalizers !== undefined) {
-                    yield peekFinalizers;
-
-                    finalizeAndVisit();
-                    return FeatureResult.CommitUntilLast;
+                if (peekers !== undefined) {
+                    yield {
+                        action: FeatureAction.PeekAhead,
+                        peekers,
+                    };
                 }
 
                 finalizeAndVisit();
-                return FeatureResult.Commit;
+                return FeatureResult.CommitUntilLast;
             }
         }
 
@@ -158,15 +161,15 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
 
                 foundDecimalDigit = true;
             } else {
-                if (peekFinalizers !== undefined) {
-                    yield peekFinalizers;
-
-                    finalizeAndVisit();
-                    return FeatureResult.CommitUntilLast;
+                if (peekers !== undefined) {
+                    yield {
+                        action: FeatureAction.PeekAhead,
+                        peekers,
+                    };
                 }
 
                 finalizeAndVisit();
-                return FeatureResult.Commit;
+                return FeatureResult.CommitUntilLast;
             }
         }
 
@@ -195,15 +198,15 @@ export default class DecimalNumberFeature extends AbstractFeature<Settings> {
 
                 foundExponentDigit = true;
             } else {
-                if (peekFinalizers !== undefined) {
-                    yield peekFinalizers;
-
-                    finalizeAndVisit();
-                    return FeatureResult.CommitUntilLast;
+                if (peekers !== undefined) {
+                    yield {
+                        action: FeatureAction.PeekAhead,
+                        peekers,
+                    };
                 }
 
                 finalizeAndVisit();
-                return FeatureResult.Commit;
+                return FeatureResult.CommitUntilLast;
             }
         }
 

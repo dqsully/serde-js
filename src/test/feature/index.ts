@@ -53,37 +53,6 @@ export type LogEntry = {
     whitespace?: boolean;
 }; // TODO: peekers
 
-const noop = () => {};
-
-export function testFeature(
-    feature: AbstractFeature,
-    input: string,
-): any {
-    let i = 0;
-
-    const visitors = createVisitors(
-        () => {
-            i += 1;
-            return i.toString();
-        },
-        noop,
-    );
-    const rootFeature = new ProxyFeature({
-        callback: noop,
-        feature,
-    });
-
-    return parseString(
-        input,
-        {
-            context: visitors.root.initialize(),
-            impl: visitors.root,
-        },
-        [rootFeature],
-        visitors,
-    );
-}
-
 export interface TestResultOk {
     finished: true;
     value: any;

@@ -1,6 +1,6 @@
 import { Visitor, Visitors } from '../../visitor/abstract';
 import {
-    AbstractFeature, AbstractFeatureParseReturn, FeatureResult, PeekAhead,
+    AbstractFeature, AbstractFeatureParseReturn, FeatureResult, Peekers, FeatureAction,
 } from '../abstract';
 
 const trueChars = 'true'.split('');
@@ -18,9 +18,8 @@ export default class BooleanFeature extends AbstractFeature<Settings> {
     public* parse(
         firstChar: string,
         visitor: Visitor,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         _visitors: Visitors,
-        peekFinalizers?: PeekAhead,
+        peekers?: Peekers,
     ): AbstractFeatureParseReturn {
         let variant: string[];
 
@@ -46,14 +45,17 @@ export default class BooleanFeature extends AbstractFeature<Settings> {
             }
         }
 
-        if (peekFinalizers !== undefined) {
-            yield peekFinalizers;
+        if (peekers !== undefined) {
+            yield {
+                action: FeatureAction.PeekAhead,
+                peekers,
+            };
         }
 
         visitor.impl.visitValue(visitor.context, variant === trueChars);
 
         // Commit all parsed chars
-        if (peekFinalizers !== undefined) {
+        if (peekers !== undefined) {
             return FeatureResult.CommitUntilLast;
         } else {
             return FeatureResult.Commit;

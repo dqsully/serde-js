@@ -1,5 +1,7 @@
-import { Visitor } from '../../visitor/abstract';
-import { AbstractFeature, AbstractFeatureParseReturn, FeatureResult } from '../abstract';
+import { Visitor, Visitors } from '../../visitor/abstract';
+import {
+    AbstractFeature, AbstractFeatureParseReturn, FeatureResult, FeatureAction, Peekers,
+} from '../abstract';
 
 const nullChars = 'null'.split('');
 
@@ -12,7 +14,12 @@ export default class NullFeature extends AbstractFeature<Settings> {
     public settings: Settings = {};
 
     // We don't use `this` because there are no settings for `NullFeature`
-    public* parse(firstChar: string, visitor: Visitor): AbstractFeatureParseReturn {
+    public* parse(
+        firstChar: string,
+        visitor: Visitor,
+        _visitors: Visitors,
+        peekers?: Peekers,
+    ): AbstractFeatureParseReturn {
         if (firstChar !== 'n') {
             return () => `expected '${firstChar}' to be 'n' for 'null'`;
         }
@@ -31,7 +38,19 @@ export default class NullFeature extends AbstractFeature<Settings> {
             }
         }
 
+        if (peekers !== undefined) {
+            yield {
+                action: FeatureAction.PeekAhead,
+                peekers,
+            };
+        }
+
         visitor.impl.visitValue(visitor.context, null);
+
+        // Commit all parsed chars
+        if (peekers !== undefined) {
+            return FeatureResult.CommitUntilLast;
+        }
 
         // Commit all parsed chars
         return FeatureResult.Commit;

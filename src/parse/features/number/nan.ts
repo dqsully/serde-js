@@ -1,6 +1,6 @@
 import { Visitor, Visitors } from '../../visitor/abstract';
 import {
-    AbstractFeature, AbstractFeatureParseReturn, FeatureResult, PeekAhead,
+    AbstractFeature, AbstractFeatureParseReturn, FeatureResult, Peekers, FeatureAction,
 } from '../abstract';
 
 const nanChars = 'NaN'.split('');
@@ -17,9 +17,8 @@ export default class NanFeature extends AbstractFeature<Settings> {
     public* parse(
         firstChar: string,
         visitor: Visitor,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         _visitors: Visitors,
-        peekFinalizers?: PeekAhead,
+        peekers?: Peekers,
     ): AbstractFeatureParseReturn {
         if (firstChar !== 'N') {
             return () => `expected '${firstChar}' to be 'N' for 'NaN'`;
@@ -39,14 +38,17 @@ export default class NanFeature extends AbstractFeature<Settings> {
             }
         }
 
-        if (peekFinalizers !== undefined) {
-            yield peekFinalizers;
+        if (peekers !== undefined) {
+            yield {
+                action: FeatureAction.PeekAhead,
+                peekers,
+            };
         }
 
         visitor.impl.visitValue(visitor.context, NaN);
 
         // Commit all parsed chars
-        if (peekFinalizers !== undefined) {
+        if (peekers !== undefined) {
             return FeatureResult.CommitUntilLast;
         }
 

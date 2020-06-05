@@ -3,7 +3,8 @@ import {
     AbstractFeature,
     AbstractFeatureParseReturn,
     FeatureResult,
-    PeekAhead,
+    Peekers,
+    FeatureAction,
 } from '../abstract';
 
 interface Settings {
@@ -21,9 +22,8 @@ export default class HexadecimalNumberFeature extends AbstractFeature<Settings> 
     public* parse(
         firstChar: string,
         visitor: Visitor,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         _visitors: Visitors,
-        peekFinalizers?: PeekAhead,
+        peekers?: Peekers,
     ): AbstractFeatureParseReturn {
         let char: string | undefined;
         let numberStr = '';
@@ -35,10 +35,10 @@ export default class HexadecimalNumberFeature extends AbstractFeature<Settings> 
                 numberStr += '-';
             } else if (this.settings.canStartWithPlus) {
                 if (firstChar !== '+') {
-                    return () => `expected ${char} to be '+', '-', or '0' for a hexadecimal number (prefix)`;
+                    return () => `expected '${firstChar}' to be '+', '-', or '0' for a hexadecimal number (prefix)`;
                 }
             } else {
-                return () => `expected ${char} to be '-' or '0' for a hexadecimal number (prefix)`;
+                return () => `expected '${firstChar}' to be '-' or '0' for a hexadecimal number (prefix)`;
             }
 
             char = yield;
@@ -47,7 +47,7 @@ export default class HexadecimalNumberFeature extends AbstractFeature<Settings> 
                 return () => 'unexpected end of file';
             }
             if (char !== '0') {
-                return () => `expected ${char} to be '0' for a hexadecimal number (prefix)`;
+                return () => `expected '${char}' to be '0' for a hexadecimal number (prefix)`;
             }
         }
 
@@ -70,8 +70,11 @@ export default class HexadecimalNumberFeature extends AbstractFeature<Settings> 
             }
         }
 
-        if (char !== undefined && peekFinalizers !== undefined) {
-            yield peekFinalizers;
+        if (char !== undefined && peekers !== undefined) {
+            yield {
+                action: FeatureAction.PeekAhead,
+                peekers,
+            };
         }
 
         const number = Number.parseInt(numberStr, 16);
@@ -79,7 +82,7 @@ export default class HexadecimalNumberFeature extends AbstractFeature<Settings> 
         visitor.impl.visitValue(visitor.context, number);
         visitor.impl.setMetadata(visitor.context, 'number.type', 'hexadecimal');
 
-        if (char !== undefined && peekFinalizers !== undefined) {
+        if (char !== undefined) {
             return FeatureResult.CommitUntilLast;
         }
 
