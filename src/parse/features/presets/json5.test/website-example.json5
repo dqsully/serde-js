@@ -9,4 +9,8 @@ No \\n's!",
   positiveSign: +1,
   trailingComma: 'in objects', andIn: ['arrays',],
   "backwardsCompatible": "with JSON",
+
+  infinity: Infinity,
+  negativeInfinity: -Infinity,
+  nan: NaN,
 }

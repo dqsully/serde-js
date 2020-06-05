@@ -40,6 +40,10 @@ describe('json5 preset', () => {
             trailingComma: 'in objects',
             andIn: ['arrays'],
             backwardsCompatible: 'with JSON',
+
+            infinity: Infinity,
+            negativeInfinity: -Infinity,
+            nan: NaN,
         });
     });
 });
