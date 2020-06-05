@@ -9,10 +9,10 @@ interface Settings {
     valueFeatures: AbstractFeature[];
 }
 export {
-    Settings as StrictCommaObjectFeatureSettings,
+    Settings as LaxCommaObjectFeatureSettings,
 };
 
-export default class StrictCommaObjectFeature extends AbstractFeature<Settings> {
+export default class LaxCommaObjectFeature extends AbstractFeature<Settings> {
     public settings: Settings;
 
     constructor(settings: Settings) {
