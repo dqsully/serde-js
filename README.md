@@ -143,6 +143,16 @@ This one isn't as pretty, but it's Input -> (Stringifier Engine <-> Tokenizer) -
         * [X] Hash comment
         * [ ] Single-line whitespace
 
+* Formatting
+    * [ ] Formatter API
+    * [ ] Tokenizer hints (object/array length, content info)
+    * [ ] String switch (proxy stringifier that chooses string implementations)
+    * [ ] Formatters
+        * [ ] None
+        * [ ] Compact
+        * [ ] Same-line bracket
+        * [ ] Next-line bracket
+
 * In-memory formats
     * [X] Just the data
         * [X] Visitor

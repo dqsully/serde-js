@@ -1,5 +1,3 @@
-import type {} from 'mocha';
-
 import { expect } from 'chai';
 import { testFeatureWithLog, LogEntry, TestResultErr } from '../../../test/feature';
 import BooleanFeature from './boolean';
